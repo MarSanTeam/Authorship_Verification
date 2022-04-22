@@ -3,7 +3,7 @@
 # pylint: disable-msg=arguments-differ
 
 """
-    FAQ Project:
+    AV Project:
         models:
             dataset
 """

@@ -21,6 +21,7 @@ from configuration import BaseConfig
 from data_loader import read_csv
 from dataset import DataModule
 from indexer import Indexer
+from models.t5_encoder import Classifier
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -89,3 +90,8 @@ if __name__ == "__main__":
     TRAINER = pl.Trainer(max_epochs=ARGS.n_epochs, gpus=[0],
                          callbacks=[CHECKPOINT_CALLBACK, EARLY_STOPPING_CALLBACK],
                          progress_bar_refresh_rate=60, logger=LOGGER)
+    # Create Model
+    STEPS_PER_EPOCH = len(TRAIN_DATA) // ARGS.batch_size
+    MODEL = Classifier(num_classes=len(set(list(TRAIN_DATA.targets))),
+                       t5_model_path=ARGS.t5_model_path,
+                       lr=ARGS.lr, max_len=ARGS.max_len)

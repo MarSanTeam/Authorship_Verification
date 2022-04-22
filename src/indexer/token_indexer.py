@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    FAQ Project:
+    AV Project:
         data preparation:
             index
 """

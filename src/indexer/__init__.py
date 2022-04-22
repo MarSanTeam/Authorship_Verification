@@ -1,5 +1,5 @@
 """
-    FAQ Project:
+    AV Project:
         Make the importing much shorter
 """
 from .indexer import Indexer
