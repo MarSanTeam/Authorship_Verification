@@ -20,13 +20,13 @@ class BaseConfig:
 
     def __init__(self):
         self.parser = argparse.ArgumentParser()
-        self.parser.add_argument("--model_name", type=str, default="Q_dec")
+        self.parser.add_argument("--model_name", type=str, default="Author_Verification")
 
         self.parser.add_argument("--raw_data_dir", type=str,
                                  default=Path(__file__).parents[2].__str__() + "/data/Raw")
 
         self.parser.add_argument("--processed_data_dir", type=str,
-                                 default=Path(__file__).parents[2].__str__() + "/data/Q_dec")
+                                 default=Path(__file__).parents[2].__str__() + "/data/Processed")
 
         self.parser.add_argument("--assets_dir", type=str,
                                  default=Path(__file__).parents[2].__str__() + "/assets/")
@@ -35,11 +35,10 @@ class BaseConfig:
                                  default=Path(__file__).parents[2].__str__() + "/assets/saved_models/"),
 
         self.parser.add_argument("--language_model_path", type=str,
-                                 default="/home/maryam.najafi/LanguageModels/mt5_en_large/",
+                                 default="/home/maryam.najafi/LanguageModels/t5_en_large/",
                                  help="Path of the multilingual lm model dir")
         self.parser.add_argument("--language_model_tokenizer_path", type=str,
-                                 default=Path(__file__).parents[2].__str__()
-                                         + "/assets/pretrained_models/mt5_tokenizer")
+                                 default="/home/maryam.najafi/LanguageModels/t5_en_large/")
         self.parser.add_argument("--roberta_model_path", type=str,
                                  default=Path(__file__).parents[2].__str__()
                                          + "/assets/pretrained_models/xlm_roberta_large")
@@ -57,12 +56,16 @@ class BaseConfig:
         self.parser.add_argument("--pair_data", type=str, default="pairs.jsonl")
         self.parser.add_argument("--truth_data", type=str, default="truth.jsonl")
 
-        self.parser.add_argument("--train_data", type=str, default="train.txt")
-        self.parser.add_argument("--test_data", type=str, default="test.txt")
-        self.parser.add_argument("--dev_data", type=str, default="val.txt")
+        self.parser.add_argument("--train_file", type=str, default="train_data.csv")
+        self.parser.add_argument("--test_file", type=str, default="test_data.csv")
+        self.parser.add_argument("--dev_file", type=str, default="val_data.csv")
 
-        self.parser.add_argument("--data_headers", type=list, default=["text", "label"])
-        self.parser.add_argument("--customized_headers", type=list, default=["text", "label"])
+        self.parser.add_argument("--data_headers",
+                                 type=list,
+                                 default=["first_text", "second_text", "lable"])
+        self.parser.add_argument("--customized_headers",
+                                 type=list,
+                                 default=["first_text", "second_text", "targets"])
 
         self.parser.add_argument("--save_top_k", type=int, default=1, help="...")
 
