@@ -11,6 +11,7 @@
 import logging
 import os
 
+from dataset import DataModule
 from pytorch_lightning.loggers import CSVLogger
 from transformers import T5Tokenizer, T5EncoderModel
 
@@ -57,3 +58,21 @@ if __name__ == "__main__":
 
     VALID_TARGETS_CONVENTIONAL = [[target] for target in list(VALID_DATA.targets)]
     VALID_INDEXED_TARGET = TARGET_INDEXER.convert_samples_to_indexes(VALID_TARGETS_CONVENTIONAL)
+    # -------------------------------- Make DalaLoader Dict ----------------------------------------
+    TRAIN_COLUMNS2DATA = {'first_questions': list(TRAIN_DATA.first_text),
+                          'second_questions': list(TRAIN_DATA.second_text),
+                          'targets': TRAIN_INDEXED_TARGET}
+
+    VAL_COLUMNS2DATA = {'first_questions': list(VALID_DATA.first_text),
+                        'second_questions': list(VALID_DATA.second_text),
+                        'targets': VALID_INDEXED_TARGET}
+
+    TEST_COLUMNS2DATA = {'first_questions': list(TEST_DATA.first_text),
+                         'second_questions': list(TEST_DATA.second_text),
+                         'targets': TEST_INDEXED_TARGET}
+
+    DATA = {'train_data': TRAIN_COLUMNS2DATA,
+            'val_data': VAL_COLUMNS2DATA, 'test_data': TRAIN_COLUMNS2DATA}
+
+    # ----------------------------- Create Data Module ----------------------------------
+    DATA_MODULE = DataModule(data=DATA, config=ARGS, tokenizer=MT5_TOKENIZER)
