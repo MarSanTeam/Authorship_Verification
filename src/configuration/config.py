@@ -80,6 +80,8 @@ class BaseConfig:
         self.parser.add_argument("--batch_size", type=int,
                                  default=32,
                                  help="...")
+        self.parser.add_argument("--max_len", type=int, default=150,
+                                 help="Maximum length of inputs")
 
         self.parser.add_argument("--lr", default=2e-5,
                                  help="...")
