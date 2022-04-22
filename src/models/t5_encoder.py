@@ -14,7 +14,7 @@ import pytorch_lightning as pl
 import torchmetrics
 
 # ============================ My packages ============================
-from transformers import MT5EncoderModel
+from transformers import T5EncoderModel
 
 
 class Classifier(pl.LightningModule):

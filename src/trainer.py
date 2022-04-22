@@ -93,5 +93,12 @@ if __name__ == "__main__":
     # Create Model
     STEPS_PER_EPOCH = len(TRAIN_DATA) // ARGS.batch_size
     MODEL = Classifier(num_classes=len(set(list(TRAIN_DATA.targets))),
-                       t5_model_path=ARGS.t5_model_path,
+                       t5_model_path=ARGS.language_model_path,
                        lr=ARGS.lr, max_len=ARGS.max_len)
+    # Train and Test Model
+    TRAINER.fit(MODEL, datamodule=DATA_MODULE)
+    TRAINER.test(ckpt_path='best', datamodule=DATA_MODULE)
+
+    # save best mt5_model_en path
+    write_json(path=ARGS.best_model_path_file,
+               data={'best_model_path': CHECKPOINT_CALLBACK.best_model_path})
