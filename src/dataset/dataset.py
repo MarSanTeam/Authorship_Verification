@@ -105,8 +105,13 @@ class ConcatDataset(CustomDataset):
         batch = self.pair_data_tokenizer(first_text, second_text)
 
         input_ids = batch.input_ids.flatten()
+        attn_mask = batch.attention_mask.flatten()
+        token_type_ids = batch.token_type_ids.flatten()
 
-        return {"input_ids": input_ids, "targets": torch.tensor(target)}
+        return {"input_ids": input_ids,
+                "attention_mask": attn_mask,
+                "token_type_ids": token_type_ids,
+                "targets": torch.tensor(target)}
 
 
 class GenerationDataset(CustomDataset):
