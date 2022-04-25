@@ -1,8 +1,7 @@
+import pytorch_lightning as pl
 import torch
 import torchmetrics
-import pytorch_lightning as pl
-from torch.utils.data import Dataset, DataLoader
-from transformers import RobertaModel, AdamW, get_linear_schedule_with_warmup
+from transformers import BertModel, AdamW
 
 
 class Classifier(pl.LightningModule):
@@ -15,27 +14,27 @@ class Classifier(pl.LightningModule):
         self.n_epochs = arg.n_epochs
         self.steps_per_epoch = steps_per_epoch  # BCEWithLogitsLoss
         self.criterion = torch.nn.CrossEntropyLoss()  # CrossEntropyLoss()
-        self.bert = RobertaModel.from_pretrained(arg.roberta_model_path, return_dict=True)
+        self.model = BertModel.from_pretrained(arg.language_model_path)  # , return_dict=True)
         self.classifier = torch.nn.Sequential(
             torch.nn.Dropout(0.25),
-            torch.nn.Linear(in_features=self.bert.config.hidden_size,
-                            out_features=self.bert.config.hidden_size // 2),
+            torch.nn.Linear(in_features=self.model.config.hidden_size,
+                            out_features=self.model.config.hidden_size // 2),
             torch.nn.Dropout(0.25),
-            torch.nn.Linear(in_features=self.bert.config.hidden_size // 2,
-                            out_features=self.bert.config.hidden_size // 4),
+            torch.nn.Linear(in_features=self.model.config.hidden_size // 2,
+                            out_features=self.model.config.hidden_size // 4),
             torch.nn.Dropout(0.25),
-            torch.nn.Linear(in_features=self.bert.config.hidden_size // 4,
+            torch.nn.Linear(in_features=self.model.config.hidden_size // 4,
                             out_features=n_classes)
         )
-        # self.classifier = torch.nn.Linear(self.bert.config.hidden_size, n_classes)
-        self.pooling = torch.nn.AvgPool1d(kernel_size=arg.max_length)
+        # self.classifier = torch.nn.Linear(self.model.config.hidden_size, n_classes)
+        self.pooling = torch.nn.AvgPool1d(kernel_size=arg.max_len)
 
         # self.dropout = torch.nn.Dropout(0.2)
         self.save_hyperparameters()
 
-    def forward(self, input_ids, attn_mask, token_type_ids):
-        bert_output = self.bert(input_ids=input_ids, attention_mask=attn_mask,
-                                token_type_ids=token_type_ids)
+    def forward(self, input_ids, attention_mask, token_type_ids):
+        bert_output = self.model(input_ids=input_ids, attention_mask=attention_mask,
+                                 token_type_ids=token_type_ids)
         # bert_output.last_hidden_state.size() = [batch_size, sen_len, 768]
 
         bert_output = bert_output.pooler_output
@@ -48,7 +47,7 @@ class Classifier(pl.LightningModule):
         input_ids = batch["input_ids"]
         attention_mask = batch["attention_mask"]
         token_type_ids = batch["token_type_ids"]
-        labels = batch["label"].flatten()
+        labels = batch["targets"].flatten()
         outputs = self.forward(input_ids, attention_mask, token_type_ids)
         loss = self.criterion(outputs, labels)
         self.log("train_acc", self.accuracy(torch.softmax(outputs, dim=1), labels),
@@ -69,7 +68,7 @@ class Classifier(pl.LightningModule):
         input_ids = batch["input_ids"]
         attention_mask = batch["attention_mask"]
         token_type_ids = batch["token_type_ids"]
-        labels = batch["label"].flatten()
+        labels = batch["targets"].flatten()
         outputs = self.forward(input_ids, attention_mask, token_type_ids)
         loss = self.criterion(outputs, labels)
         self.log("val_acc", self.accuracy(torch.softmax(outputs, dim=1), labels),
@@ -89,7 +88,7 @@ class Classifier(pl.LightningModule):
         input_ids = batch["input_ids"]
         attention_mask = batch["attention_mask"]
         token_type_ids = batch["token_type_ids"]
-        labels = batch["label"].flatten()
+        labels = batch["targets"].flatten()
         outputs = self.forward(input_ids, attention_mask, token_type_ids)
         loss = self.criterion(outputs, labels)
         self.log("test_acc", self.accuracy(torch.softmax(outputs, dim=1), labels),
