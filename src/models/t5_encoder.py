@@ -14,7 +14,7 @@ import pytorch_lightning as pl
 import torchmetrics
 
 # ============================ My packages ============================
-from transformers import T5EncoderModel
+from transformers import BertModel, T5EncoderModel
 
 
 class Classifier(pl.LightningModule):
@@ -22,18 +22,18 @@ class Classifier(pl.LightningModule):
         Classifier
     """
 
-    def __init__(self, num_classes, t5_model_path, lr, max_len):
+    def __init__(self, arg, n_classes):
         super().__init__()
         self.accuracy = torchmetrics.Accuracy()
-        self.f_score = torchmetrics.F1(average='none', num_classes=num_classes)
-        self.f_score_total = torchmetrics.F1(average="weighted", num_classes=num_classes)
-        self.max_len = max_len
-        self.learning_rare = lr
+        self.f_score = torchmetrics.F1(average='none', num_classes=n_classes)
+        self.f_score_total = torchmetrics.F1(average="weighted", num_classes=n_classes)
+        self.max_len = arg.max_len
+        self.learning_rare = arg.lr
 
-        self.model = T5EncoderModel.from_pretrained(t5_model_path)
-        self.classifier = nn.Linear(self.model.config.d_model, num_classes)
+        self.model = T5EncoderModel.from_pretrained(arg.language_model_path)
+        self.classifier = nn.Linear(self.model.config.d_model, n_classes)
 
-        self.max_pool = nn.MaxPool1d(max_len)
+        self.max_pool = nn.MaxPool1d(arg.max_len)
 
         self.loss = nn.CrossEntropyLoss()
         self.save_hyperparameters()
