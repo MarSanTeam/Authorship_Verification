@@ -124,7 +124,7 @@ if __name__ == "__main__":
                          "targets": TEST_INDEXED_TARGET}
 
     DATA = {"train_data": TRAIN_COLUMNS2DATA,
-            "val_data": VAL_COLUMNS2DATA, "test_data": TRAIN_COLUMNS2DATA}
+            "val_data": VAL_COLUMNS2DATA, "test_data": TEST_COLUMNS2DATA}
 
     # ----------------------------- Create Data Module ----------------------------------
     DATA_MODULE = DataModule(data=DATA, config=ARGS, tokenizer=T5_TOKENIZER)
