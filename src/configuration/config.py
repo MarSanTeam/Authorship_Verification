@@ -35,12 +35,12 @@ class BaseConfig:
                                  default=Path(__file__).parents[2].__str__() + "/assets/saved_models/"),
 
         self.parser.add_argument("--language_model_path", type=str,
-                                 # "/home/maryam.najafi/LanguageModels/BertLarge/"
-                                 # "/home/maryam.najafi/LanguageModels/t5_en_large/"
-                                 default="/home/maryam.najafi/LanguageModels/BertLarge/model/",
+                                 default=Path(__file__).parents[3].__str__()
+                                         + "/LanguageModels/t5_en_large/",
                                  help="Path of the multilingual lm model dir")
         self.parser.add_argument("--language_model_tokenizer_path", type=str,
-                                 default="/home/maryam.najafi/LanguageModels/BertLarge/tokenizer/")
+                                 default=Path(__file__).parents[3].__str__()
+                                         + "/LanguageModels/t5_en_large/")
         self.parser.add_argument("--roberta_model_path", type=str,
                                  default=Path(__file__).parents[2].__str__()
                                          + "/assets/pretrained_models/xlm_roberta_large")
@@ -80,9 +80,9 @@ class BaseConfig:
                                  help="...")
 
         self.parser.add_argument("--batch_size", type=int,
-                                 default=32,
+                                 default=16,
                                  help="...")
-        self.parser.add_argument("--max_len", type=int, default=150,
+        self.parser.add_argument("--max_len", type=int, default=300,
                                  help="Maximum length of inputs")
 
         self.parser.add_argument("--lr", default=2e-5,

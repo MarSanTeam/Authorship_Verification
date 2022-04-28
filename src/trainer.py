@@ -15,13 +15,13 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from pytorch_lightning.loggers import CSVLogger
-from transformers import BertModel, BertTokenizer
+from transformers import T5EncoderModel, T5Tokenizer
 
 from configuration import BaseConfig
 from data_loader import read_csv, write_json
 from dataset import DataModule
 from indexer import Indexer
-from models.bert_model import Classifier
+from models.t5_encoder import Classifier
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -29,12 +29,11 @@ if __name__ == "__main__":
     # -------------------------------- Create config instance----------------------------------
     CONFIG_CLASS = BaseConfig()
     ARGS = CONFIG_CLASS.get_config()
-    TOKENIZER = BertTokenizer.from_pretrained(ARGS.language_model_tokenizer_path)
-    MODEL = BertModel.from_pretrained(ARGS.language_model_path)
+    TOKENIZER = T5Tokenizer.from_pretrained(ARGS.language_model_tokenizer_path)
+    MODEL = T5EncoderModel.from_pretrained(ARGS.language_model_path)
 
     # create CSVLogger instance
     LOGGER = CSVLogger(save_dir=ARGS.saved_model_path, name=ARGS.model_name)
-
     # ----------------------------------- Load raw data------------------------------------------
     TRAIN_DATA = read_csv(path=os.path.join(ARGS.processed_data_dir, ARGS.train_file),
                           columns=ARGS.data_headers,
@@ -76,7 +75,7 @@ if __name__ == "__main__":
                          'targets': TEST_INDEXED_TARGET}
 
     DATA = {'train_data': TRAIN_COLUMNS2DATA,
-            'val_data': VAL_COLUMNS2DATA, 'test_data': TRAIN_COLUMNS2DATA}
+            'val_data': VAL_COLUMNS2DATA, 'test_data': TEST_COLUMNS2DATA}
 
     # ----------------------------- Create Data Module ----------------------------------
     DATA_MODULE = DataModule(data=DATA, config=ARGS, tokenizer=TOKENIZER)
@@ -92,10 +91,9 @@ if __name__ == "__main__":
                          progress_bar_refresh_rate=60, logger=LOGGER)
     # Create Model
     STEPS_PER_EPOCH = len(TRAIN_DATA) // ARGS.batch_size
-    MODEL = Classifier(arg=ARGS, n_classes=len(set(list(TRAIN_DATA.targets))),
-                       steps_per_epoch=STEPS_PER_EPOCH)
+    MY_MODEL = Classifier(arg=ARGS, n_classes=len(set(list(TRAIN_DATA.targets))))
     # Train and Test Model
-    TRAINER.fit(MODEL, datamodule=DATA_MODULE)
+    TRAINER.fit(MY_MODEL, datamodule=DATA_MODULE)
     TRAINER.test(ckpt_path='best', datamodule=DATA_MODULE)
 
     # save best mt5_model_en path
