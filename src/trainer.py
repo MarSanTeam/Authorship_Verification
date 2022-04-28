@@ -23,7 +23,7 @@ from data_loader import read_csv, write_json
 from dataset import DataModule
 from indexer import Indexer, TokenIndexer
 from models.t5_encoder import Classifier
-from utils import extract_punctuation
+from utils import extract_punctuation, create_punc_pair
 from data_prepration import word_tokenizer
 
 logging.basicConfig(level=logging.DEBUG)
@@ -103,23 +103,24 @@ if __name__ == "__main__":
     TEST_FIRST_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TEST_FIRST_TEXT_PUNCTUATIONS)
     TEST_SECOND_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TEST_SECOND_TEXT_PUNCTUATIONS)
 
+    TRAIN_PUNCTUATIONS = create_punc_pair(TRAIN_FIRST_TEXT_PUNCTUATIONS, TRAIN_SECOND_TEXT_PUNCTUATIONS)
+    VALID_PUNCTUATIONS = create_punc_pair(VALID_FIRST_TEXT_PUNCTUATIONS, VALID_SECOND_TEXT_PUNCTUATIONS)
+    TEST_PUNCTUATIONS = create_punc_pair(TEST_FIRST_TEXT_PUNCTUATIONS, TEST_SECOND_TEXT_PUNCTUATIONS)
+
     # -------------------------------- Make DataLoader Dict ----------------------------------------
     TRAIN_COLUMNS2DATA = {"first_text": list(TRAIN_DATA.first_text),
                           "second_text": list(TRAIN_DATA.second_text),
-                          "first_punc": TRAIN_FIRST_TEXT_PUNCTUATIONS,
-                          "second_punc": TRAIN_SECOND_TEXT_PUNCTUATIONS,
+                          "punctuations": TRAIN_PUNCTUATIONS,
                           "targets": TRAIN_INDEXED_TARGET}
 
     VAL_COLUMNS2DATA = {"first_text": list(VALID_DATA.first_text),
                         "second_text": list(VALID_DATA.second_text),
-                        "first_punc": VALID_FIRST_TEXT_PUNCTUATIONS,
-                        "second_punc": VALID_SECOND_TEXT_PUNCTUATIONS,
+                        "punctuations": VALID_PUNCTUATIONS,
                         "targets": VALID_INDEXED_TARGET}
 
     TEST_COLUMNS2DATA = {"first_text": list(TEST_DATA.first_text),
                          "second_text": list(TEST_DATA.second_text),
-                         "first_punc": TEST_FIRST_TEXT_PUNCTUATIONS,
-                         "second_punc": TEST_SECOND_TEXT_PUNCTUATIONS,
+                         "punctuations": TEST_PUNCTUATIONS,
                          "targets": TEST_INDEXED_TARGET}
 
     DATA = {"train_data": TRAIN_COLUMNS2DATA,
@@ -142,8 +143,8 @@ if __name__ == "__main__":
     MODEL = Classifier(num_classes=len(set(list(TRAIN_DATA.targets))),
                        t5_model_path=ARGS.language_model_path, lr=ARGS.lr,
                        max_len=ARGS.max_len, embedding_dim=ARGS.embedding_dim,
-                       vocab_size=len(PUNCTUATION_INDEXER.get_vocab2idx()),
-                       pad_idx=0)
+                       vocab_size=len(PUNCTUATION_INDEXER.get_vocab2idx())+2,
+                       pad_idx=0, filter_sizes=ARGS.filter_sizes, n_filters=ARGS.n_filters)
     # Train and Test Model
     TRAINER.fit(MODEL, datamodule=DATA_MODULE)
     TRAINER.test(ckpt_path="best", datamodule=DATA_MODULE)
