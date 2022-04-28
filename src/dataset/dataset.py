@@ -26,6 +26,9 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
     def __init__(self, data: dict, tokenizer, max_len: int):
         self.first_text = data["first_text"]
         self.second_text = data["second_text"]
+
+        self.first_punc = data["first_punc"]
+        self.second_punc = data["second_punc"]
         self.targets = None
         if "targets" in data:
             self.targets = data["targets"]
@@ -44,10 +47,13 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
         """
         first_text = self.first_text[item_index]
         second_text = self.second_text[item_index]
+
+        first_punc = self.first_punc[item_index]
+        second_punc = self.second_punc[item_index]
         if self.targets:
             target = self.targets[item_index]
-            return first_text, second_text, target
-        return first_text, second_text
+            return first_text, second_text, first_punc, second_punc, target
+        return first_text, second_text, first_punc, second_punc
 
     def pair_data_tokenizer(self, first_text, second_text):
         batch = self.tokenizer.encode_plus(text=first_text,
@@ -80,7 +86,7 @@ class SeparateDataset(CustomDataset):
         super().__init__(data, tokenizer, max_len)
 
     def __getitem__(self, item_index):
-        first_text, second_text, target = super(SeparateDataset, self).__getitem__(item_index)
+        first_text, second_text, first_punc, second_punc, target = super(SeparateDataset, self).__getitem__(item_index)
         first_text = self.single_data_tokenizer(first_text)
         second_text = self.single_data_tokenizer(second_text)
 
@@ -89,6 +95,8 @@ class SeparateDataset(CustomDataset):
 
         return {"first_text": first_text,
                 "second_text": second_text,
+                "first_punc": first_punc,
+                "second_punc": second_punc,
                 "targets": torch.tensor(target)}
 
 
