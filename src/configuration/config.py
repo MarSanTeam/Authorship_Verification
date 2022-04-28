@@ -86,26 +86,17 @@ class BaseConfig:
         self.parser.add_argument("--lr", default=2e-5,
                                  help="...")
 
-        self.parser.add_argument("--lstm_units", type=int,
+        self.parser.add_argument("--n_filters", type=int,
                                  default=128,
                                  help="...")
-        self.parser.add_argument("--lstm_layers", type=int,
-                                 default=2,
-                                 help="...")
-        self.parser.add_argument("--bidirectional", type=bool,
-                                 default=True,
+        self.parser.add_argument("--filter_sizes", type=int,
+                                 default=[1, 2, 3],
                                  help="...")
         self.parser.add_argument("--dropout", type=float,
                                  default=0.15,
                                  help="...")
         self.parser.add_argument("--embedding_dim", type=int,
-                                 default=256,
-                                 help="...")
-        self.parser.add_argument("--alpha", type=float,
-                                 default=50.0,
-                                 help="...")
-        self.parser.add_argument("--alpha_warmup_ratio", type=float,
-                                 default=0.1,
+                                 default=50,
                                  help="...")
 
     def get_config(self):
