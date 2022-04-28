@@ -31,7 +31,7 @@ def pad_sequence(texts: List[list], max_length: int, pad_item: str = "[PAD]") ->
     """
     for idx, text in enumerate(texts):
         text_length = len(text)
-        texts[idx].extend([pad_item] * (max_length - text_length))
+        texts[idx].extend([0] * (max_length - text_length))
     return texts
 
 
@@ -44,6 +44,22 @@ def truncate_sequence(texts: List[list], max_length: int) -> list:
     """
     for idx, text in enumerate(texts):
         if len(text) > max_length:
-            texts[idx] = text[: max_length - 1]
-            texts[idx].append("[SEP]")
+            texts[idx] = text[: max_length-1]
+            texts[idx].append(29)
     return texts
+
+
+def create_punc_pair(first_texts: List[list], second_texts: List[list]) -> List[list]:
+    """
+
+    :param first_texts:
+    :param second_texts:
+    :return:
+    """
+    data = []
+    for first_text, second_text in zip(first_texts, second_texts):
+        pair_text = first_text + [28] + second_text
+        data.append(pair_text)
+    data = pad_sequence(data, max_length=100)
+    data = truncate_sequence(data, max_length=100)
+    return data
