@@ -72,13 +72,18 @@ class BaseConfig:
         self.parser.add_argument("--save_top_k", type=int, default=1, help="...")
 
         self.parser.add_argument("--num_workers", type=int,
-                                 default=10,
+                                 default=8,
                                  help="...")
 
         self.parser.add_argument("--n_epochs", type=int,
                                  default=100,
                                  help="...")
-
+        self.parser.add_argument("--n_filters", type=int,
+                                 default=128,
+                                 help="...")
+        self.parser.add_argument("--filter_sizes", type=int,
+                                 default=[1, 2, 3],
+                                 help="...")
         self.parser.add_argument("--batch_size", type=int,
                                  default=16,
                                  help="...")

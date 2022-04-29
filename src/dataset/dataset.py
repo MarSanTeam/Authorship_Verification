@@ -26,6 +26,9 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
     def __init__(self, data: dict, tokenizer, max_len: int):
         self.first_text = data["first_text"]
         self.second_text = data["second_text"]
+
+        self.punctuations = data["punctuations"]
+        # self.pos = data["pos"]
         self.targets = None
         if "targets" in data:
             self.targets = data["targets"]
@@ -44,10 +47,13 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
         """
         first_text = self.first_text[item_index]
         second_text = self.second_text[item_index]
+
+        punctuations = self.punctuations[item_index]
+        # pos = self.pos[item_index]
         if self.targets:
             target = self.targets[item_index]
-            return first_text, second_text, target
-        return first_text, second_text
+            return first_text, second_text, punctuations, target
+        return first_text, second_text, punctuations
 
     def pair_data_tokenizer(self, first_text, second_text):
         batch = self.tokenizer.encode_plus(text=first_text,
@@ -80,7 +86,7 @@ class SeparateDataset(CustomDataset):
         super().__init__(data, tokenizer, max_len)
 
     def __getitem__(self, item_index):
-        first_text, second_text, target = super(SeparateDataset, self).__getitem__(item_index)
+        first_text, second_text, punctuations, target = super(SeparateDataset, self).__getitem__(item_index)
         first_text = self.single_data_tokenizer(first_text)
         second_text = self.single_data_tokenizer(second_text)
 
@@ -101,16 +107,13 @@ class ConcatDataset(CustomDataset):
         super().__init__(data, tokenizer, max_len)
 
     def __getitem__(self, item_index):
-        first_text, second_text, target = super(ConcatDataset, self).__getitem__(item_index)
+        first_text, second_text, punctuations, target = super(ConcatDataset, self).__getitem__(item_index)
         batch = self.pair_data_tokenizer(first_text, second_text)
 
         input_ids = batch.input_ids.flatten()
-        attn_mask = batch.attention_mask.flatten()
-        token_type_ids = batch.token_type_ids.flatten()
 
-        return {"input_ids": input_ids,
-                "attention_mask": attn_mask,
-                "token_type_ids": token_type_ids,
+        return {"input_ids": input_ids, "punctuation": torch.tensor(punctuations),
+                # "pos": torch.tensor(pos),
                 "targets": torch.tensor(target)}
 
 

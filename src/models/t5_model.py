@@ -14,7 +14,7 @@ import pytorch_lightning as pl
 import torchmetrics
 
 # ============================ My packages ============================
-from transformers import T5Model, BertModel, BertTokenizer
+from transformers import MT5Model
 
 
 class Classifier(pl.LightningModule):
@@ -30,7 +30,7 @@ class Classifier(pl.LightningModule):
                         'f_score_total':
                             torchmetrics.F1(average="weighted", num_classes=num_classes)}
 
-        self.model = BertModel.from_pretrained(self.config.t5_model_path)
+        self.model = T5Model.from_pretrained(self.config.t5_model_path)
         self.classifier = nn.Linear(self.model.config.d_model, num_classes)
         self.max_pool = nn.MaxPool1d(self.config.max_len)
         self.loss = nn.CrossEntropyLoss()
