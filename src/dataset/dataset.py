@@ -27,7 +27,8 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
         self.first_text = data["first_text"]
         self.second_text = data["second_text"]
 
-        self.punctuations = data["punctuations"]
+        self.first_punctuations = data["first_punctuations"]
+        self.second_punctuations = data["second_punctuations"]
         self.targets = None
         if "targets" in data:
             self.targets = data["targets"]
@@ -47,11 +48,12 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
         first_text = self.first_text[item_index]
         second_text = self.second_text[item_index]
 
-        punctuations = self.punctuations[item_index]
+        first_punctuations = self.first_punctuations[item_index]
+        second_punctuations = self.second_punctuations[item_index]
         if self.targets:
             target = self.targets[item_index]
-            return first_text, second_text, punctuations, target
-        return first_text, second_text, punctuations
+            return first_text, second_text, first_punctuations, second_punctuations, target
+        return first_text, second_text, first_punctuations, second_punctuations
 
     def pair_data_tokenizer(self, first_text, second_text):
         batch = self.tokenizer.encode_plus(text=first_text,
@@ -105,12 +107,14 @@ class ConcatDataset(CustomDataset):
         super().__init__(data, tokenizer, max_len)
 
     def __getitem__(self, item_index):
-        first_text, second_text, punctuations, target = super(ConcatDataset, self).__getitem__(item_index)
+        first_text, second_text, first_punctuations, second_punctuations, target = super(ConcatDataset, self).__getitem__(item_index)
         batch = self.pair_data_tokenizer(first_text, second_text)
+        punctuations = self.pair_data_tokenizer(first_punctuations, second_punctuations)
 
         input_ids = batch.input_ids.flatten()
+        punctuations = punctuations.input_ids.flatten()
 
-        return {"input_ids": input_ids, "punctuation": torch.tensor(punctuations),
+        return {"input_ids": input_ids, "punctuation": punctuations,
                 "targets": torch.tensor(target)}
 
 

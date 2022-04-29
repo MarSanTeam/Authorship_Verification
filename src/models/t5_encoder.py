@@ -32,19 +32,19 @@ class Classifier(pl.LightningModule):
         self.learning_rare = lr
 
         self.model = T5EncoderModel.from_pretrained(t5_model_path)
-        self.punc_embeddings = nn.Embedding(kwargs["vocab_size"],
-                                            embedding_dim=kwargs["embedding_dim"],
-                                            padding_idx=kwargs["pad_idx"])
-        self.punc_embeddings.weight.requires_grad = True
+        # self.punc_embeddings = nn.Embedding(kwargs["vocab_size"],
+        #                                     embedding_dim=kwargs["embedding_dim"],
+        #                                     padding_idx=kwargs["pad_idx"])
+        # self.punc_embeddings.weight.requires_grad = True
 
         self.convs = nn.ModuleList([
             nn.Conv2d(in_channels=1,
                       out_channels=kwargs["n_filters"],
-                      kernel_size=(fs, kwargs["embedding_dim"]))
+                      kernel_size=(fs, self.model.config.d_model))#kwargs["embedding_dim"]))
             for fs in kwargs["filter_sizes"]
         ])
 
-        self.classifier = nn.Linear(self.model.config.d_model + (len(kwargs["filter_sizes"])*kwargs["n_filters"]),
+        self.classifier = nn.Linear(2*self.model.config.d_model,# + (len(kwargs["filter_sizes"])*kwargs["n_filters"]),
                                     num_classes)
 
         self.max_pool = nn.MaxPool1d(max_len)
@@ -56,25 +56,28 @@ class Classifier(pl.LightningModule):
         input_ids = batch["input_ids"]
         punctuation = batch["punctuation"]  # .to("cuda:0")
 
-        punctuation = self.punc_embeddings(punctuation)
+        punctuation = self.model(punctuation).last_hidden_state.permute(0, 2, 1)
+
+        # punctuation = self.punc_embeddings(punctuation)
         # punctuation = [batch_size, sent_len, emb_dim]
 
-        punctuation = punctuation.unsqueeze(1)
-        # embedded_cnn = [batch_size, 1, sent_len, emb_dim]
-
-        conved = [torch.nn.ReLU()(conv(punctuation)).squeeze(3) for conv in self.convs]
-        # conved_n = [batch_size, n_filters, sent_len - filter_sizes[n] + 1]
-
-        pooled = [F.max_pool1d(conv, conv.shape[2]).squeeze(2) for conv in conved]
-        # pooled_n = [batch_size, n_filters]
-
-        cat_cnn = torch.cat(pooled, dim=1)
+        # punctuation = punctuation.unsqueeze(1)
+        # # embedded_cnn = [batch_size, 1, sent_len, emb_dim]
+        #
+        # conved = [torch.nn.ReLU()(conv(punctuation)).squeeze(3) for conv in self.convs]
+        # # conved_n = [batch_size, n_filters, sent_len - filter_sizes[n] + 1]
+        #
+        # pooled = [F.max_pool1d(conv, conv.shape[2]).squeeze(2) for conv in conved]
+        # # pooled_n = [batch_size, n_filters]
+        #
+        # cat_cnn = torch.cat(pooled, dim=1)
         # cat_cnn = [batch_size, n_filters * len(filter_sizes)]
 
         output_encoder = self.model(input_ids).last_hidden_state.permute(0, 2, 1)
 
         maxed_pool = self.max_pool(output_encoder).squeeze(2)
-        features = torch.cat((cat_cnn, maxed_pool), dim=1)
+        punctuation = self.max_pool(punctuation).squeeze(2)
+        features = torch.cat((punctuation, maxed_pool), dim=1)
 
         final_output = self.classifier(features)
         return final_output

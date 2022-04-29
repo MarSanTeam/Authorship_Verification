@@ -67,14 +67,14 @@ if __name__ == "__main__":
     logging.info("Test punctuations are extracted")
 
     # --------------------------------- Punctuation tokenization -------------------------------
-    TRAIN_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(TRAIN_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
-    TRAIN_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(TRAIN_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
-
-    VALID_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(VALID_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
-    VALID_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(VALID_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
-
-    TEST_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(TEST_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
-    TEST_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(TEST_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
+    # TRAIN_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(TRAIN_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
+    # TRAIN_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(TRAIN_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
+    #
+    # VALID_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(VALID_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
+    # VALID_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(VALID_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
+    #
+    # TEST_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(TEST_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
+    # TEST_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(TEST_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
 
     # ------------------------------------- Indexer --------------------------------------------
     TARGET_INDEXER = Indexer(vocabs=list(TRAIN_DATA.targets))
@@ -89,38 +89,41 @@ if __name__ == "__main__":
     VALID_TARGETS_CONVENTIONAL = [[target] for target in list(VALID_DATA.targets)]
     VALID_INDEXED_TARGET = TARGET_INDEXER.convert_samples_to_indexes(VALID_TARGETS_CONVENTIONAL)
 
-    PUNCTUATION_VOCABS = list(itertools.chain(*TRAIN_FIRST_TEXT_PUNCTUATIONS + TRAIN_SECOND_TEXT_PUNCTUATIONS))
-
-    PUNCTUATION_INDEXER = TokenIndexer(vocabs=PUNCTUATION_VOCABS)
-    PUNCTUATION_INDEXER.build_vocab2idx()
-
-    TRAIN_FIRST_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TRAIN_FIRST_TEXT_PUNCTUATIONS)
-    TRAIN_SECOND_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TRAIN_SECOND_TEXT_PUNCTUATIONS)
-
-    VALID_FIRST_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(VALID_FIRST_TEXT_PUNCTUATIONS)
-    VALID_SECOND_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(VALID_SECOND_TEXT_PUNCTUATIONS)
-
-    TEST_FIRST_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TEST_FIRST_TEXT_PUNCTUATIONS)
-    TEST_SECOND_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TEST_SECOND_TEXT_PUNCTUATIONS)
-
-    TRAIN_PUNCTUATIONS = create_punc_pair(TRAIN_FIRST_TEXT_PUNCTUATIONS, TRAIN_SECOND_TEXT_PUNCTUATIONS)
-    VALID_PUNCTUATIONS = create_punc_pair(VALID_FIRST_TEXT_PUNCTUATIONS, VALID_SECOND_TEXT_PUNCTUATIONS)
-    TEST_PUNCTUATIONS = create_punc_pair(TEST_FIRST_TEXT_PUNCTUATIONS, TEST_SECOND_TEXT_PUNCTUATIONS)
+    # PUNCTUATION_VOCABS = list(itertools.chain(*TRAIN_FIRST_TEXT_PUNCTUATIONS + TRAIN_SECOND_TEXT_PUNCTUATIONS))
+    #
+    # PUNCTUATION_INDEXER = TokenIndexer(vocabs=PUNCTUATION_VOCABS)
+    # PUNCTUATION_INDEXER.build_vocab2idx()
+    #
+    # TRAIN_FIRST_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TRAIN_FIRST_TEXT_PUNCTUATIONS)
+    # TRAIN_SECOND_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TRAIN_SECOND_TEXT_PUNCTUATIONS)
+    #
+    # VALID_FIRST_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(VALID_FIRST_TEXT_PUNCTUATIONS)
+    # VALID_SECOND_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(VALID_SECOND_TEXT_PUNCTUATIONS)
+    #
+    # TEST_FIRST_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TEST_FIRST_TEXT_PUNCTUATIONS)
+    # TEST_SECOND_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TEST_SECOND_TEXT_PUNCTUATIONS)
+    #
+    # TRAIN_PUNCTUATIONS = create_punc_pair(TRAIN_FIRST_TEXT_PUNCTUATIONS, TRAIN_SECOND_TEXT_PUNCTUATIONS)
+    # VALID_PUNCTUATIONS = create_punc_pair(VALID_FIRST_TEXT_PUNCTUATIONS, VALID_SECOND_TEXT_PUNCTUATIONS)
+    # TEST_PUNCTUATIONS = create_punc_pair(TEST_FIRST_TEXT_PUNCTUATIONS, TEST_SECOND_TEXT_PUNCTUATIONS)
 
     # -------------------------------- Make DataLoader Dict ----------------------------------------
     TRAIN_COLUMNS2DATA = {"first_text": list(TRAIN_DATA.first_text),
                           "second_text": list(TRAIN_DATA.second_text),
-                          "punctuations": TRAIN_PUNCTUATIONS,
+                          "first_punctuations": TRAIN_FIRST_TEXT_PUNCTUATIONS,
+                          "second_punctuations": TRAIN_SECOND_TEXT_PUNCTUATIONS,
                           "targets": TRAIN_INDEXED_TARGET}
 
     VAL_COLUMNS2DATA = {"first_text": list(VALID_DATA.first_text),
                         "second_text": list(VALID_DATA.second_text),
-                        "punctuations": VALID_PUNCTUATIONS,
+                        "first_punctuations": VALID_FIRST_TEXT_PUNCTUATIONS,
+                        "second_punctuations": VALID_SECOND_TEXT_PUNCTUATIONS,
                         "targets": VALID_INDEXED_TARGET}
 
     TEST_COLUMNS2DATA = {"first_text": list(TEST_DATA.first_text),
                          "second_text": list(TEST_DATA.second_text),
-                         "punctuations": TEST_PUNCTUATIONS,
+                         "first_punctuations": TEST_FIRST_TEXT_PUNCTUATIONS,
+                         "second_punctuations": TEST_SECOND_TEXT_PUNCTUATIONS,
                          "targets": TEST_INDEXED_TARGET}
 
     DATA = {"train_data": TRAIN_COLUMNS2DATA,
@@ -135,7 +138,7 @@ if __name__ == "__main__":
                                           mode="min")
     # -------------------------------- Instantiate the Model Trainer -----------------------------
     EARLY_STOPPING_CALLBACK = EarlyStopping(monitor="val_loss", patience=5)
-    TRAINER = pl.Trainer(max_epochs=ARGS.n_epochs, gpus=[0],
+    TRAINER = pl.Trainer(max_epochs=ARGS.n_epochs, gpus=[1],
                          callbacks=[CHECKPOINT_CALLBACK, EARLY_STOPPING_CALLBACK],
                          progress_bar_refresh_rate=60, logger=LOGGER)
     # Create Model
@@ -143,7 +146,7 @@ if __name__ == "__main__":
     MODEL = Classifier(num_classes=len(set(list(TRAIN_DATA.targets))),
                        t5_model_path=ARGS.language_model_path, lr=ARGS.lr,
                        max_len=ARGS.max_len, embedding_dim=ARGS.embedding_dim,
-                       vocab_size=len(PUNCTUATION_INDEXER.get_vocab2idx())+2,
+                       vocab_size=10,#len(PUNCTUATION_INDEXER.get_vocab2idx())+2,
                        pad_idx=0, filter_sizes=ARGS.filter_sizes, n_filters=ARGS.n_filters)
     # Train and Test Model
     TRAINER.fit(MODEL, datamodule=DATA_MODULE)
