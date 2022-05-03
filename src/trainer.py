@@ -55,30 +55,41 @@ if __name__ == "__main__":
     logging.info('test set contain %s sample ...', len(TEST_DATA))
 
     # ---------------------------------------extract pos---------------------------------
-    TRAIN_FIRST_TEXT_POS = extract_pos(TRAIN_DATA.first_text)
-    TRAIN_SECOND_TEXT_POS = extract_pos(TRAIN_DATA.second_text)
+    # TRAIN_FIRST_TEXT_POS = extract_pos(TRAIN_DATA.first_text)
+    # TRAIN_SECOND_TEXT_POS = extract_pos(TRAIN_DATA.second_text)
+    # logging.info("Train pos are extracted")
+    #
+    # VALID_FIRST_TEXT_POS = extract_pos(VALID_DATA.first_text)
+    # VALID_SECOND_TEXT_POS = extract_pos(VALID_DATA.second_text)
+    # logging.info("Valid pos are extracted")
+    #
+    # TEST_FIRST_TEXT_POS = extract_pos(TEST_DATA.first_text)
+    # TEST_SECOND_TEXT_POS = extract_pos(TEST_DATA.second_text)
+    # logging.info("Test pos are extracted")
+    # ---------------------------- Write POS ------------------------------------
+    # write_pickle("TRAIN_FIRST_TEXT_POS.pkl", TRAIN_FIRST_TEXT_POS)
+    # write_pickle("TRAIN_SECOND_TEXT_POS.pkl", TRAIN_SECOND_TEXT_POS)
+    # logging.info("Train pos are saved")
+    #
+    # write_pickle("VALID_FIRST_TEXT_POS.pkl", VALID_FIRST_TEXT_POS)
+    # write_pickle("VALID_SECOND_TEXT_POS.pkl", VALID_SECOND_TEXT_POS)
+    # logging.info("Valid pos are saved")
+    #
+    # write_pickle("TEST_FIRST_TEXT_POS.pkl", TEST_FIRST_TEXT_POS)
+    # write_pickle("TEST_SECOND_TEXT_POS.pkl", TEST_SECOND_TEXT_POS)
+    # logging.info("Test pos are saved")
+    # ----------------------------- Read POS --------------------------------------------
+    TRAIN_FIRST_TEXT_POS = read_pickle("TRAIN_FIRST_TEXT_POS.pkl")
+    TRAIN_SECOND_TEXT_POS = read_pickle("TRAIN_SECOND_TEXT_POS.pkl")
     logging.info("Train pos are extracted")
 
-    VALID_FIRST_TEXT_POS = extract_pos(VALID_DATA.first_text)
-    VALID_SECOND_TEXT_POS = extract_pos(VALID_DATA.second_text)
+    VALID_FIRST_TEXT_POS = read_pickle("VALID_FIRST_TEXT_POS.pkl")
+    VALID_SECOND_TEXT_POS = read_pickle("VALID_SECOND_TEXT_POS.pkl")
     logging.info("Valid pos are extracted")
 
-    TEST_FIRST_TEXT_POS = extract_pos(TEST_DATA.first_text)
-    TEST_SECOND_TEXT_POS = extract_pos(TEST_DATA.second_text)
+    TEST_FIRST_TEXT_POS = read_pickle("TEST_FIRST_TEXT_POS.pkl")
+    TEST_SECOND_TEXT_POS = read_pickle("TEST_SECOND_TEXT_POS.pkl")
     logging.info("Test pos are extracted")
-    # ---------------------------- Write POS ------------------------------------
-    write_pickle("TRAIN_FIRST_TEXT_POS.pkl", TRAIN_FIRST_TEXT_POS)
-    write_pickle("TRAIN_SECOND_TEXT_POS.pkl", TRAIN_SECOND_TEXT_POS)
-    logging.info("Train pos are saved")
-
-    write_pickle("VALID_FIRST_TEXT_POS.pkl", VALID_FIRST_TEXT_POS)
-    write_pickle("VALID_SECOND_TEXT_POS.pkl", VALID_SECOND_TEXT_POS)
-    logging.info("Valid pos are saved")
-
-    write_pickle("TEST_FIRST_TEXT_POS.pkl", TEST_FIRST_TEXT_POS)
-    write_pickle("TEST_SECOND_TEXT_POS.pkl", TEST_SECOND_TEXT_POS)
-    logging.info("Test pos are saved")
-    # ----------------------------- Read POS ------------------------------------
     # ---------------------------------------extract pos---------------------------------
     TRAIN_FIRST_TEXT_POS = read_pickle("TRAIN_FIRST_TEXT_POS.pkl")
     TRAIN_SECOND_TEXT_POS = read_pickle("TRAIN_SECOND_TEXT_POS.pkl")
