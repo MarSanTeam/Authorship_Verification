@@ -19,12 +19,12 @@ from pytorch_lightning.loggers import CSVLogger
 from transformers import T5Tokenizer, T5EncoderModel
 
 from configuration import BaseConfig
-from data_loader import read_csv, write_json, read_pickle, write_pickle
+from data_loader import read_csv, write_json, read_pickle
 from data_prepration import word_tokenizer
 from dataset import DataModule
 from indexer import Indexer, TokenIndexer
 from models.t5_encoder import Classifier
-from utils import extract_punctuation, create_sample_pair, extract_pos
+from utils import extract_punctuation, create_sample_pair
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -53,7 +53,6 @@ if __name__ == "__main__":
                          columns=ARGS.data_headers,
                          names=ARGS.customized_headers).dropna()
     logging.info('test set contain %s sample ...', len(TEST_DATA))
-    print(TRAIN_DATA.first_text[0])
 
     # ---------------------------------------extract pos---------------------------------
     TRAIN_FIRST_TEXT_POS = extract_pos(TRAIN_DATA.first_text)
@@ -79,12 +78,23 @@ if __name__ == "__main__":
     write_pickle("TEST_FIRST_TEXT_POS.pkl", TEST_FIRST_TEXT_POS)
     write_pickle("TEST_SECOND_TEXT_POS.pkl", TEST_SECOND_TEXT_POS)
     logging.info("Test pos are saved")
+    # ----------------------------- Read POS ------------------------------------
+    # ---------------------------------------extract pos---------------------------------
+    TRAIN_FIRST_TEXT_POS = read_pickle("TRAIN_FIRST_TEXT_POS.pkl")
+    TRAIN_SECOND_TEXT_POS = read_pickle("TRAIN_SECOND_TEXT_POS.pkl")
+    logging.info("Train pos are extracted")
 
+    VALID_FIRST_TEXT_POS = read_pickle("VALID_FIRST_TEXT_POS.pkl")
+    VALID_SECOND_TEXT_POS = read_pickle("VALID_SECOND_TEXT_POS.pkl")
+    logging.info("Valid pos are extracted")
+
+    TEST_FIRST_TEXT_POS = read_pickle("TEST_FIRST_TEXT_POS.pkl")
+    TEST_SECOND_TEXT_POS = read_pickle("TEST_SECOND_TEXT_POS.pkl")
+    logging.info("Test pos are extracted")
     # --------------------------extract_punctuation-----------------------------
     TRAIN_FIRST_TEXT_PUNCTUATIONS = extract_punctuation(TRAIN_DATA.first_text)
     TRAIN_SECOND_TEXT_PUNCTUATIONS = extract_punctuation(TRAIN_DATA.second_text)
     logging.info("Train punctuations are extracted")
-    print(TRAIN_FIRST_TEXT_PUNCTUATIONS[0])
 
     VALID_FIRST_TEXT_PUNCTUATIONS = extract_punctuation(VALID_DATA.first_text)
     VALID_SECOND_TEXT_PUNCTUATIONS = extract_punctuation(VALID_DATA.second_text)
@@ -97,7 +107,6 @@ if __name__ == "__main__":
     # --------------------------------- Punctuation tokenization -------------------------------
     TRAIN_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(TRAIN_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
     TRAIN_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(TRAIN_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
-    print(TRAIN_FIRST_TEXT_PUNCTUATIONS[0])
 
     VALID_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(VALID_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
     VALID_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(VALID_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
@@ -179,10 +188,10 @@ if __name__ == "__main__":
     # ----------------------------- Create Data Module ----------------------------------
     DATA_MODULE = DataModule(data=DATA, config=ARGS, tokenizer=T5_TOKENIZER)
     DATA_MODULE.setup()
-    CHECKPOINT_CALLBACK = ModelCheckpoint(monitor="val_acc",
+    CHECKPOINT_CALLBACK = ModelCheckpoint(monitor="val_loss",
                                           filename="QTag-{epoch:02d}-{val_loss:.2f}",
                                           save_top_k=ARGS.save_top_k,
-                                          mode="max")
+                                          mode="min")
     # -------------------------------- Instantiate the Model Trainer -----------------------------
     EARLY_STOPPING_CALLBACK = EarlyStopping(monitor="val_loss", patience=5)
     TRAINER = pl.Trainer(max_epochs=ARGS.n_epochs, gpus=[0],
