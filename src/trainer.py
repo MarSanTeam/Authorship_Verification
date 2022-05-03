@@ -23,8 +23,8 @@ from data_loader import read_csv, write_json, read_pickle
 from data_prepration import word_tokenizer
 from dataset import DataModule
 from indexer import Indexer, TokenIndexer
-from models.t5_encoder import Classifier
-from utils import extract_punctuation, create_sample_pair
+from models.t5_pos_encoder import Classifier
+from utils import create_sample_pair, extract_punctuation  # , extract_pos
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -82,23 +82,9 @@ if __name__ == "__main__":
     TRAIN_FIRST_TEXT_POS = read_pickle("TRAIN_FIRST_TEXT_POS.pkl")
     TRAIN_SECOND_TEXT_POS = read_pickle("TRAIN_SECOND_TEXT_POS.pkl")
     logging.info("Train pos are extracted")
-
     VALID_FIRST_TEXT_POS = read_pickle("VALID_FIRST_TEXT_POS.pkl")
     VALID_SECOND_TEXT_POS = read_pickle("VALID_SECOND_TEXT_POS.pkl")
     logging.info("Valid pos are extracted")
-
-    TEST_FIRST_TEXT_POS = read_pickle("TEST_FIRST_TEXT_POS.pkl")
-    TEST_SECOND_TEXT_POS = read_pickle("TEST_SECOND_TEXT_POS.pkl")
-    logging.info("Test pos are extracted")
-    # ---------------------------------------extract pos---------------------------------
-    TRAIN_FIRST_TEXT_POS = read_pickle("TRAIN_FIRST_TEXT_POS.pkl")
-    TRAIN_SECOND_TEXT_POS = read_pickle("TRAIN_SECOND_TEXT_POS.pkl")
-    logging.info("Train pos are extracted")
-
-    VALID_FIRST_TEXT_POS = read_pickle("VALID_FIRST_TEXT_POS.pkl")
-    VALID_SECOND_TEXT_POS = read_pickle("VALID_SECOND_TEXT_POS.pkl")
-    logging.info("Valid pos are extracted")
-
     TEST_FIRST_TEXT_POS = read_pickle("TEST_FIRST_TEXT_POS.pkl")
     TEST_SECOND_TEXT_POS = read_pickle("TEST_SECOND_TEXT_POS.pkl")
     logging.info("Test pos are extracted")
@@ -118,10 +104,8 @@ if __name__ == "__main__":
     # --------------------------------- Punctuation tokenization -------------------------------
     TRAIN_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(TRAIN_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
     TRAIN_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(TRAIN_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
-
     VALID_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(VALID_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
     VALID_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(VALID_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
-
     TEST_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(TEST_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
     TEST_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(TEST_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
 
@@ -140,13 +124,13 @@ if __name__ == "__main__":
     # -------------------------------------Token Indexer --------------------------------------------
 
     PUNCTUATION_VOCABS = list(itertools.chain(*TRAIN_FIRST_TEXT_PUNCTUATIONS + TRAIN_SECOND_TEXT_PUNCTUATIONS))
-    # POS_VOCABS = list(itertools.chain(*TRAIN_FIRST_TEXT_POS + TRAIN_SECOND_TEXT_POS))
+    POS_VOCABS = list(itertools.chain(*TRAIN_FIRST_TEXT_POS + TRAIN_SECOND_TEXT_POS))
 
     PUNCTUATION_INDEXER = TokenIndexer(vocabs=PUNCTUATION_VOCABS)
     PUNCTUATION_INDEXER.build_vocab2idx()
 
-    # POS_INDEXER = TokenIndexer(vocabs=POS_VOCABS)
-    # POS_INDEXER.build_vocab2idx()
+    POS_INDEXER = TokenIndexer(vocabs=POS_VOCABS)
+    POS_INDEXER.build_vocab2idx()
 
     TRAIN_FIRST_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TRAIN_FIRST_TEXT_PUNCTUATIONS)
     TRAIN_SECOND_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TRAIN_SECOND_TEXT_PUNCTUATIONS)
@@ -157,40 +141,40 @@ if __name__ == "__main__":
     TEST_FIRST_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TEST_FIRST_TEXT_PUNCTUATIONS)
     TEST_SECOND_TEXT_PUNCTUATIONS = PUNCTUATION_INDEXER.convert_samples_to_indexes(TEST_SECOND_TEXT_PUNCTUATIONS)
 
-    # TRAIN_FIRST_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(TRAIN_FIRST_TEXT_POS)
-    # TRAIN_SECOND_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(TRAIN_SECOND_TEXT_POS)
+    TRAIN_FIRST_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(TRAIN_FIRST_TEXT_POS)
+    TRAIN_SECOND_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(TRAIN_SECOND_TEXT_POS)
     #
-    # VALID_FIRST_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(VALID_FIRST_TEXT_POS)
-    # VALID_SECOND_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(VALID_SECOND_TEXT_POS)
+    VALID_FIRST_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(VALID_FIRST_TEXT_POS)
+    VALID_SECOND_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(VALID_SECOND_TEXT_POS)
     #
-    # TEST_FIRST_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(TEST_FIRST_TEXT_POS)
-    # TEST_SECOND_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(TEST_SECOND_TEXT_POS)
-    #
-    # ---------------------------------------create_punc_pair------------------------------------------
-    TRAIN_PUNCTUATIONS = create_sample_pair(TRAIN_FIRST_TEXT_PUNCTUATIONS, TRAIN_SECOND_TEXT_PUNCTUATIONS)
-    VALID_PUNCTUATIONS = create_sample_pair(VALID_FIRST_TEXT_PUNCTUATIONS, VALID_SECOND_TEXT_PUNCTUATIONS)
-    TEST_PUNCTUATIONS = create_sample_pair(TEST_FIRST_TEXT_PUNCTUATIONS, TEST_SECOND_TEXT_PUNCTUATIONS)
+    TEST_FIRST_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(TEST_FIRST_TEXT_POS)
+    TEST_SECOND_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(TEST_SECOND_TEXT_POS)
 
-    # TRAIN_POS = create_sample_pair(TRAIN_FIRST_TEXT_POS, TRAIN_SECOND_TEXT_POS)
-    # VALID_POS = create_sample_pair(VALID_FIRST_TEXT_POS, VALID_SECOND_TEXT_POS)
-    # TEST_POS = create_sample_pair(TEST_FIRST_TEXT_POS, TEST_SECOND_TEXT_POS)
+    # ---------------------------------------create_punc_pair------------------------------------------
+    TRAIN_PUNCTUATIONS = create_sample_pair(ARGS,TRAIN_FIRST_TEXT_PUNCTUATIONS, TRAIN_SECOND_TEXT_PUNCTUATIONS)
+    VALID_PUNCTUATIONS = create_sample_pair(ARGS,VALID_FIRST_TEXT_PUNCTUATIONS, VALID_SECOND_TEXT_PUNCTUATIONS)
+    TEST_PUNCTUATIONS = create_sample_pair(ARGS,TEST_FIRST_TEXT_PUNCTUATIONS, TEST_SECOND_TEXT_PUNCTUATIONS)
+
+    TRAIN_POS = create_sample_pair(ARGS,TRAIN_FIRST_TEXT_POS, TRAIN_SECOND_TEXT_POS)
+    VALID_POS = create_sample_pair(ARGS,VALID_FIRST_TEXT_POS, VALID_SECOND_TEXT_POS)
+    TEST_POS = create_sample_pair(ARGS,TEST_FIRST_TEXT_POS, TEST_SECOND_TEXT_POS)
     # -------------------------------- Make DataLoader Dict ----------------------------------------
     TRAIN_COLUMNS2DATA = {"first_text": list(TRAIN_DATA.first_text),
                           "second_text": list(TRAIN_DATA.second_text),
                           "punctuations": TRAIN_PUNCTUATIONS,
-                          # "pos": TRAIN_POS,
+                          "pos": TRAIN_POS,
                           "targets": TRAIN_INDEXED_TARGET}
 
     VAL_COLUMNS2DATA = {"first_text": list(VALID_DATA.first_text),
                         "second_text": list(VALID_DATA.second_text),
                         "punctuations": VALID_PUNCTUATIONS,
-                        # "pos": VALID_POS,
+                        "pos": VALID_POS,
                         "targets": VALID_INDEXED_TARGET}
 
     TEST_COLUMNS2DATA = {"first_text": list(TEST_DATA.first_text),
                          "second_text": list(TEST_DATA.second_text),
                          "punctuations": TEST_PUNCTUATIONS,
-                         # "pos": TEST_POS,
+                         "pos": TEST_POS,
                          "targets": TEST_INDEXED_TARGET}
 
     DATA = {"train_data": TRAIN_COLUMNS2DATA,
@@ -211,11 +195,10 @@ if __name__ == "__main__":
     # Create Model
     STEPS_PER_EPOCH = len(TRAIN_DATA) // ARGS.batch_size
     MODEL = Classifier(num_classes=len(set(list(TRAIN_DATA.targets))),
-                       t5_model_path=ARGS.language_model_path, lr=ARGS.lr,
-                       max_len=ARGS.max_len, embedding_dim=ARGS.embedding_dim,
-                       vocab_size=len(PUNCTUATION_INDEXER.get_vocab2idx()) + 2,
-                       pad_idx=0, filter_sizes=ARGS.filter_sizes, n_filters=ARGS.n_filters)
-    # Train and Test Model
+                       args=ARGS,
+                       vocab_size_punc=len(PUNCTUATION_INDEXER.get_vocab2idx()) + 2,
+                       vocab_size_pos=len(POS_INDEXER.get_vocab2idx()) + 2,
+                       pad_idx=0)
     TRAINER.fit(MODEL, datamodule=DATA_MODULE)
     TRAINER.test(ckpt_path="best", datamodule=DATA_MODULE)
 

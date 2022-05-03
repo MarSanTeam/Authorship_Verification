@@ -1,12 +1,10 @@
+# import nltk
+# nltk.download('punkt')
+# from nltk.tokenize import word_tokenize
+# from nltk import pos_tag
+import re
 import string
 from typing import List
-
-import nltk
-
-nltk.download('punkt')
-from nltk.tokenize import word_tokenize
-from nltk import pos_tag
-import re
 
 
 def extract_pos(texts: List[str]) -> List[str]:
@@ -65,7 +63,7 @@ def truncate_sequence(texts: List[list], max_length: int) -> list:
     return texts
 
 
-def create_sample_pair(first_texts: List[list], second_texts: List[list]) -> List[list]:
+def create_sample_pair(args, first_texts: List[list], second_texts: List[list]) -> List[list]:
     """
 
     :param first_texts:
@@ -76,6 +74,6 @@ def create_sample_pair(first_texts: List[list], second_texts: List[list]) -> Lis
     for first_text, second_text in zip(first_texts, second_texts):
         pair_text = first_text + [28] + second_text
         data.append(pair_text)
-    data = pad_sequence(data, max_length=100)
-    data = truncate_sequence(data, max_length=100)
+    data = pad_sequence(data, max_length=args.max_len)
+    data = truncate_sequence(data, max_length=args.max_len)
     return data
