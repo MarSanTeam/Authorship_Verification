@@ -1,7 +1,7 @@
 # import nltk
 # nltk.download('punkt')
-# from nltk.tokenize import word_tokenize
-# from nltk import pos_tag
+from nltk.tokenize import word_tokenize
+from nltk import pos_tag
 import re
 import string
 from typing import List
