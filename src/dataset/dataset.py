@@ -142,34 +142,6 @@ class ConcatDataset(CustomDataset):
         return {"input_ids": input_ids, "punctuation": punctuations, "information": information, "pos": pos,
                 "targets": torch.tensor(target)}
 
-
-class GenerationDataset(CustomDataset):
-    """
-        GenerativeDataset
-    """
-
-    def __init__(self, data: dict, tokenizer, max_len: int):
-        super().__init__(data, tokenizer, max_len)
-
-    def __getitem__(self, item_index):
-        """
-
-        :param item_index:
-        :return:
-        """
-        first_text, second_text, target = super(GenerationDataset, self).__getitem__(item_index)
-
-        input_batch = self.pair_data_tokenizer(first_text, second_text)
-
-        with self.tokenizer.as_target_tokenizer():
-            target_batch = self.single_data_tokenizer(str(target))
-
-        inputs_ids = input_batch.input_ids.flatten()
-        target_ids = target_batch.input_ids.flatten()
-
-        return {"input_ids": inputs_ids, "targets": torch.tensor(target), "target_ids": target_ids}
-
-
 class InferenceDataset(CustomDataset):
     """
     dataset to inference  data from model checkpoint
