@@ -5,6 +5,7 @@
 import re
 import string
 from typing import List
+import json
 
 import emoji
 
@@ -115,3 +116,17 @@ def create_punc_pair(first_texts: List[list], second_texts: List[list]) -> List[
     data = pad_sequence(data, max_length=100)
     data = truncate_sequence(data, max_length=100)
     return data
+
+
+def prepare_test_data(path: str):
+    """
+
+    :param path:
+    :return:
+    """
+    first_authors_texts, second_authors_texts = [], []
+    for line in open(path, encoding="utf8"):
+        data = json.loads(line.strip())
+        first_authors_texts.append(data["pair"][0])
+        second_authors_texts.append(data["pair"][1])
+    return first_authors_texts, second_authors_texts
