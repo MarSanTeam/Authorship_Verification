@@ -139,25 +139,36 @@ class ConcatDataset(CustomDataset):
         information = information.input_ids.flatten()
         pos = pos.input_ids.flatten()
 
-        return {"input_ids": input_ids, "punctuation": punctuations, "information": information, "pos": pos,
+        return {"input_ids": input_ids, "punctuation": punctuations,
+                "information": information, "pos": pos,
                 "targets": torch.tensor(target)}
+
 
 class InferenceDataset(CustomDataset):
     """
     dataset to inference  data from model checkpoint
     """
 
-    def __init__(self, data: dict, tokenizer, max_len):
-        super(InferenceDataset, self).__init__(data, tokenizer, max_len)
-
     def __getitem__(self, item_index):
-        first_text, second_text = super(InferenceDataset, self).__getitem__(item_index)
+        first_text, second_text, first_punctuations, second_punctuations, \
+        first_information, second_information, first_pos, \
+        second_pos, target = super(InferenceDataset, self).__getitem__(item_index)
 
-        batch = self.pair_data_tokenizer(first_text, second_text)
+        batch = self.pair_data_tokenizer(first_text, second_text, self.max_len)
+        punctuations = self.pair_data_tokenizer(first_punctuations, second_punctuations,
+                                                max_len=self.max_len)
+        information = self.pair_data_tokenizer(first_information, second_information,
+                                               max_len=self.max_len)
+        pos = self.pair_data_tokenizer(first_pos, second_pos,
+                                       max_len=self.max_len)
 
         input_ids = batch.input_ids.flatten()
+        punctuations = punctuations.input_ids.flatten()
+        information = information.input_ids.flatten()
+        pos = pos.input_ids.flatten()
 
-        return {"input_ids": input_ids}
+        return {"input_ids": input_ids, "punctuation": punctuations,
+                "information": information, "pos": pos}
 
 
 class DataModule(pl.LightningDataModule):
