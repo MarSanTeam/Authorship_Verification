@@ -29,6 +29,16 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
 
         self.first_punctuations = data["first_punctuations"]
         self.second_punctuations = data["second_punctuations"]
+<<<<<<< HEAD
+=======
+
+        self.first_information = data["first_information"]
+        self.second_information = data["second_information"]
+
+        self.first_pos = data["first_pos"]
+        self.second_pos = data["second_pos"]
+
+>>>>>>> add_architecture
         self.targets = None
         if "targets" in data:
             self.targets = data["targets"]
@@ -50,19 +60,35 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
 
         first_punctuations = self.first_punctuations[item_index]
         second_punctuations = self.second_punctuations[item_index]
+<<<<<<< HEAD
         if self.targets:
             target = self.targets[item_index]
             return first_text, second_text, first_punctuations, second_punctuations, target
         return first_text, second_text, first_punctuations, second_punctuations
+=======
 
-    def pair_data_tokenizer(self, first_text, second_text):
+        first_information = self.first_information[item_index]
+        second_information = self.second_information[item_index]
+
+        first_pos = self.first_pos[item_index]
+        second_pos = self.second_pos[item_index]
+
+        if self.targets:
+            target = self.targets[item_index]
+            return first_text, second_text, first_punctuations, second_punctuations, first_information, \
+                   second_information, first_pos, second_pos, target
+        return first_text, second_text, first_punctuations, second_punctuations, \
+               first_information, second_information, first_pos, second_pos
+>>>>>>> add_architecture
+
+    def pair_data_tokenizer(self, first_text, second_text, max_len):
         batch = self.tokenizer.encode_plus(text=first_text,
                                            text_pair=second_text,
                                            add_special_tokens=True,
-                                           max_length=self.max_len,
+                                           max_length=max_len,
                                            return_tensors="pt",
                                            padding="max_length",
-                                           truncation=True,
+                                           truncation="longest_first",
                                            return_token_type_ids=True)
         return batch
 
@@ -107,6 +133,7 @@ class ConcatDataset(CustomDataset):
         super().__init__(data, tokenizer, max_len)
 
     def __getitem__(self, item_index):
+<<<<<<< HEAD
         first_text, second_text, first_punctuations, second_punctuations, target = super(ConcatDataset, self).__getitem__(item_index)
         batch = self.pair_data_tokenizer(first_text, second_text)
         punctuations = self.pair_data_tokenizer(first_punctuations, second_punctuations)
@@ -115,6 +142,25 @@ class ConcatDataset(CustomDataset):
         punctuations = punctuations.input_ids.flatten()
 
         return {"input_ids": input_ids, "punctuation": punctuations,
+=======
+        first_text, second_text, first_punctuations, second_punctuations, \
+        first_information, second_information, first_pos, second_pos, target = super(ConcatDataset, self).__getitem__(
+            item_index)
+        batch = self.pair_data_tokenizer(first_text, second_text, max_len=self.max_len)
+        punctuations = self.pair_data_tokenizer(first_punctuations, second_punctuations,
+                                                max_len=self.max_len)
+        information = self.pair_data_tokenizer(first_information, second_information,
+                                               max_len=self.max_len)
+        pos = self.pair_data_tokenizer(first_pos, second_pos,
+                                       max_len=self.max_len)
+
+        input_ids = batch.input_ids.flatten()
+        punctuations = punctuations.input_ids.flatten()
+        information = information.input_ids.flatten()
+        pos = pos.input_ids.flatten()
+
+        return {"input_ids": input_ids, "punctuation": punctuations, "information": information, "pos": pos,
+>>>>>>> add_architecture
                 "targets": torch.tensor(target)}
 
 
