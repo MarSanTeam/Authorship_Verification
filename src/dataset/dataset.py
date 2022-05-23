@@ -152,7 +152,7 @@ class InferenceDataset(CustomDataset):
     def __getitem__(self, item_index):
         first_text, second_text, first_punctuations, second_punctuations, \
         first_information, second_information, first_pos, \
-        second_pos, target = super(InferenceDataset, self).__getitem__(item_index)
+        second_pos = super(InferenceDataset, self).__getitem__(item_index)
 
         batch = self.pair_data_tokenizer(first_text, second_text, self.max_len)
         punctuations = self.pair_data_tokenizer(first_punctuations, second_punctuations,
