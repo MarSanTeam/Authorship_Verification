@@ -6,6 +6,8 @@ import re
 import string
 from typing import List
 
+import emoji
+
 
 def extract_pos(texts: List[str]) -> List[str]:
     poses = []
@@ -15,6 +17,27 @@ def extract_pos(texts: List[str]) -> List[str]:
 
         poses.append(pos_taged)
     return poses
+
+
+def extract_punctuation_emoji(texts: List[str]) -> List[str]:
+    """
+
+    :param texts:
+    :return:
+    """
+    punctuations = []
+    punc = set(string.punctuation)
+    emj = set(emoji.UNICODE_EMOJI['en'])
+
+    pattern = r"(?<=\<).*?(?=\>)"
+    exclude = punc | emj
+    exclude.remove(">")
+    exclude.remove("<")
+    for txt in texts:
+        txt = re.sub(pattern, "", txt)
+        punc = " ".join(ch for ch in txt if ch in exclude)
+        punctuations.append(punc)
+    return punctuations
 
 
 def extract_punctuation(texts: List[str]) -> List[str]:
@@ -32,6 +55,21 @@ def extract_punctuation(texts: List[str]) -> List[str]:
         punc = " ".join(ch for ch in text if ch in exclude)
         punctuations.append(punc)
     return punctuations
+
+
+def extract_information(texts: List[str]) -> List[str]:
+    """
+
+    :param texts:
+    :return:
+    """
+    extracted_information = []
+    pattern = r"(?<=\<).*?(?=\>)"
+    for text in texts:
+        text = re.findall(pattern, text)
+        extracted_information.append(" ".join(text))
+
+    return extracted_information
 
 
 def pad_sequence(texts: List[list], max_length: int, pad_item: str = "[PAD]") -> List[list]:
@@ -63,7 +101,7 @@ def truncate_sequence(texts: List[list], max_length: int) -> list:
     return texts
 
 
-def create_sample_pair(args, first_texts: List[list], second_texts: List[list]) -> List[list]:
+def create_punc_pair(first_texts: List[list], second_texts: List[list]) -> List[list]:
     """
 
     :param first_texts:
@@ -74,6 +112,6 @@ def create_sample_pair(args, first_texts: List[list], second_texts: List[list]) 
     for first_text, second_text in zip(first_texts, second_texts):
         pair_text = first_text + [28] + second_text
         data.append(pair_text)
-    data = pad_sequence(data, max_length=args.max_len)
-    data = truncate_sequence(data, max_length=args.max_len)
+    data = pad_sequence(data, max_length=100)
+    data = truncate_sequence(data, max_length=100)
     return data
