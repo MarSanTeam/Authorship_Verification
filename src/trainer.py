@@ -11,7 +11,6 @@
 import itertools
 import logging
 import os
-import itertools
 
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
@@ -19,21 +18,12 @@ from pytorch_lightning.loggers import CSVLogger
 from transformers import T5Tokenizer
 
 from configuration import BaseConfig
-<<<<<<< HEAD
-from data_loader import read_csv, write_json
-from dataset import DataModule
-from indexer import Indexer, TokenIndexer
-from models.t5_encoder import Classifier
-from utils import extract_punctuation, create_punc_pair
-from data_prepration import word_tokenizer
-=======
 from data_loader import read_csv, write_json, read_pickle, write_pickle
 from dataset import DataModule
 from indexer import Indexer, TokenIndexer
 from models import build_checkpoint_callback
 from models.t5_encoder_pos import Classifier
 from utils import extract_information, extract_punctuation_emoji, extract_pos
->>>>>>> add_architecture
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -146,31 +136,6 @@ if __name__ == "__main__":
     # TEST_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(TEST_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
     # TEST_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(TEST_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
 
-<<<<<<< HEAD
-    TRAIN_FIRST_TEXT_PUNCTUATIONS = extract_punctuation(TRAIN_DATA.first_text)
-    TRAIN_SECOND_TEXT_PUNCTUATIONS = extract_punctuation(TRAIN_DATA.second_text)
-    logging.info("Train punctuations are extracted")
-
-    VALID_FIRST_TEXT_PUNCTUATIONS = extract_punctuation(VALID_DATA.first_text)
-    VALID_SECOND_TEXT_PUNCTUATIONS = extract_punctuation(VALID_DATA.second_text)
-    logging.info("Valid punctuations are extracted")
-
-    TEST_FIRST_TEXT_PUNCTUATIONS = extract_punctuation(TEST_DATA.first_text)
-    TEST_SECOND_TEXT_PUNCTUATIONS = extract_punctuation(TEST_DATA.second_text)
-    logging.info("Test punctuations are extracted")
-
-    # --------------------------------- Punctuation tokenization -------------------------------
-    # TRAIN_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(TRAIN_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
-    # TRAIN_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(TRAIN_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
-    #
-    # VALID_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(VALID_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
-    # VALID_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(VALID_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
-    #
-    # TEST_FIRST_TEXT_PUNCTUATIONS = word_tokenizer(TEST_FIRST_TEXT_PUNCTUATIONS, lambda x: x.split())
-    # TEST_SECOND_TEXT_PUNCTUATIONS = word_tokenizer(TEST_SECOND_TEXT_PUNCTUATIONS, lambda x: x.split())
-
-=======
->>>>>>> add_architecture
     # ------------------------------------- Indexer --------------------------------------------
     TARGET_INDEXER = Indexer(vocabs=list(TRAIN_DATA.targets))
     TARGET_INDEXER.build_vocab2idx()
@@ -183,11 +148,6 @@ if __name__ == "__main__":
 
     VALID_TARGETS_CONVENTIONAL = [[target] for target in list(VALID_DATA.targets)]
     VALID_INDEXED_TARGET = TARGET_INDEXER.convert_samples_to_indexes(VALID_TARGETS_CONVENTIONAL)
-<<<<<<< HEAD
-
-    # PUNCTUATION_VOCABS = list(itertools.chain(*TRAIN_FIRST_TEXT_PUNCTUATIONS + TRAIN_SECOND_TEXT_PUNCTUATIONS))
-    #
-=======
     # ------------------------------------- Token Indexer -----------------------------------------
 
     # PUNCTUATION_VOCABS = list(itertools.chain(*TRAIN_FIRST_TEXT_PUNCTUATIONS + TRAIN_SECOND_TEXT_PUNCTUATIONS))
@@ -214,7 +174,6 @@ if __name__ == "__main__":
 
     # PUNCTUATION_VOCABS = list(itertools.chain(*TRAIN_FIRST_TEXT_PUNCTUATIONS + TRAIN_SECOND_TEXT_PUNCTUATIONS))
 
->>>>>>> add_architecture
     # PUNCTUATION_INDEXER = TokenIndexer(vocabs=PUNCTUATION_VOCABS)
     # PUNCTUATION_INDEXER.build_vocab2idx()
     #
@@ -230,51 +189,38 @@ if __name__ == "__main__":
     # TRAIN_PUNCTUATIONS = create_punc_pair(TRAIN_FIRST_TEXT_PUNCTUATIONS, TRAIN_SECOND_TEXT_PUNCTUATIONS)
     # VALID_PUNCTUATIONS = create_punc_pair(VALID_FIRST_TEXT_PUNCTUATIONS, VALID_SECOND_TEXT_PUNCTUATIONS)
     # TEST_PUNCTUATIONS = create_punc_pair(TEST_FIRST_TEXT_PUNCTUATIONS, TEST_SECOND_TEXT_PUNCTUATIONS)
-<<<<<<< HEAD
-
-=======
     # TRAIN_POS = create_sample_pair(ARGS, TRAIN_FIRST_TEXT_POS, TRAIN_SECOND_TEXT_POS)
     # VALID_POS = create_sample_pair(ARGS, VALID_FIRST_TEXT_POS, VALID_SECOND_TEXT_POS)
     # TEST_POS = create_sample_pair(ARGS, TEST_FIRST_TEXT_POS, TEST_SECOND_TEXT_POS)
->>>>>>> add_architecture
     # -------------------------------- Make DataLoader Dict ----------------------------------------
     TRAIN_COLUMNS2DATA = {"first_text": list(TRAIN_DATA.first_text),
                           "second_text": list(TRAIN_DATA.second_text),
                           "first_punctuations": TRAIN_FIRST_TEXT_PUNCTUATIONS,
                           "second_punctuations": TRAIN_SECOND_TEXT_PUNCTUATIONS,
-<<<<<<< HEAD
-=======
                           "first_information": TRAIN_FIRST_TEXT_INFORMATION,
                           "second_information": TRAIN_SECOND_TEXT_INFORMATION,
                           "first_pos": TRAIN_FIRST_TEXT_POS,
                           "second_pos": TRAIN_SECOND_TEXT_POS,
->>>>>>> add_architecture
                           "targets": TRAIN_INDEXED_TARGET}
 
     VAL_COLUMNS2DATA = {"first_text": list(VALID_DATA.first_text),
                         "second_text": list(VALID_DATA.second_text),
                         "first_punctuations": VALID_FIRST_TEXT_PUNCTUATIONS,
                         "second_punctuations": VALID_SECOND_TEXT_PUNCTUATIONS,
-<<<<<<< HEAD
-=======
                         "first_information": VALID_FIRST_TEXT_INFORMATION,
                         "second_information": VALID_SECOND_TEXT_INFORMATION,
                         "first_pos": VALID_FIRST_TEXT_POS,
                         "second_pos": VALID_SECOND_TEXT_POS,
->>>>>>> add_architecture
                         "targets": VALID_INDEXED_TARGET}
 
     TEST_COLUMNS2DATA = {"first_text": list(TEST_DATA.first_text),
                          "second_text": list(TEST_DATA.second_text),
                          "first_punctuations": TEST_FIRST_TEXT_PUNCTUATIONS,
                          "second_punctuations": TEST_SECOND_TEXT_PUNCTUATIONS,
-<<<<<<< HEAD
-=======
                          "first_information": TEST_FIRST_TEXT_INFORMATION,
                          "second_information": TEST_SECOND_TEXT_INFORMATION,
                          "first_pos": TEST_FIRST_TEXT_POS,
                          "second_pos": TEST_SECOND_TEXT_POS,
->>>>>>> add_architecture
                          "targets": TEST_INDEXED_TARGET}
 
     DATA = {"train_data": TRAIN_COLUMNS2DATA,
@@ -288,13 +234,8 @@ if __name__ == "__main__":
                                                     mode="max",
                                                     filename="QTag-{epoch:02d}-{val_acc:.2f}")
     # -------------------------------- Instantiate the Model Trainer -----------------------------
-<<<<<<< HEAD
-    EARLY_STOPPING_CALLBACK = EarlyStopping(monitor="val_loss", patience=5)
-    TRAINER = pl.Trainer(max_epochs=ARGS.n_epochs, gpus=[1],
-=======
     EARLY_STOPPING_CALLBACK = EarlyStopping(monitor="val_acc", patience=7, mode="max")
     TRAINER = pl.Trainer(max_epochs=ARGS.n_epochs, gpus=[0],
->>>>>>> add_architecture
                          callbacks=[CHECKPOINT_CALLBACK, EARLY_STOPPING_CALLBACK],
                          progress_bar_refresh_rate=60, logger=LOGGER)
     # Create Model
@@ -302,14 +243,9 @@ if __name__ == "__main__":
     MODEL = Classifier(num_classes=len(set(list(TRAIN_DATA.targets))),
                        t5_model_path=ARGS.language_model_path, lr=ARGS.lr,
                        max_len=ARGS.max_len, embedding_dim=ARGS.embedding_dim,
-<<<<<<< HEAD
-                       vocab_size=10,#len(PUNCTUATION_INDEXER.get_vocab2idx())+2,
-                       pad_idx=0, filter_sizes=ARGS.filter_sizes, n_filters=ARGS.n_filters)
-=======
                        pad_idx=0, filter_sizes=ARGS.filter_sizes, n_filters=ARGS.n_filters)
     # MODEL = Classifier(args=ARGS, num_classes=len(set(list(TRAIN_DATA.targets))))
 
->>>>>>> add_architecture
     # Train and Test Model
     TRAINER.fit(MODEL, datamodule=DATA_MODULE)
     TRAINER.test(ckpt_path="best", datamodule=DATA_MODULE)

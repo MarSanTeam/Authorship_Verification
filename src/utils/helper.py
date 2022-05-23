@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-from typing import List
-import string
-import re
-=======
 # import nltk
 # nltk.download('punkt')
 # from nltk.tokenize import word_tokenize
@@ -43,7 +38,6 @@ def extract_punctuation_emoji(texts: List[str]) -> List[str]:
         punc = " ".join(ch for ch in txt if ch in exclude)
         punctuations.append(punc)
     return punctuations
->>>>>>> add_architecture
 
 
 def extract_punctuation(texts: List[str]) -> List[str]:
@@ -63,8 +57,6 @@ def extract_punctuation(texts: List[str]) -> List[str]:
     return punctuations
 
 
-<<<<<<< HEAD
-=======
 def extract_information(texts: List[str]) -> List[str]:
     """
 
@@ -80,7 +72,6 @@ def extract_information(texts: List[str]) -> List[str]:
     return extracted_information
 
 
->>>>>>> add_architecture
 def pad_sequence(texts: List[list], max_length: int, pad_item: str = "[PAD]") -> List[list]:
     """
 
@@ -105,11 +96,7 @@ def truncate_sequence(texts: List[list], max_length: int) -> list:
     """
     for idx, text in enumerate(texts):
         if len(text) > max_length:
-<<<<<<< HEAD
-            texts[idx] = text[: max_length-1]
-=======
             texts[idx] = text[: max_length - 1]
->>>>>>> add_architecture
             texts[idx].append(29)
     return texts
 

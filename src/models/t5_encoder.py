@@ -44,11 +44,7 @@ class Classifier(pl.LightningModule):
             for fs in kwargs["filter_sizes"]
         ])
 
-<<<<<<< HEAD
-        self.classifier = nn.Linear(2*self.model.config.d_model,# + (len(kwargs["filter_sizes"])*kwargs["n_filters"]),
-=======
         self.classifier = nn.Linear(2 * self.model.config.d_model + (len(kwargs["filter_sizes"])*kwargs["n_filters"]),
->>>>>>> add_architecture
                                     num_classes)
 
         self.max_pool = nn.MaxPool1d(max_len)
@@ -58,37 +54,11 @@ class Classifier(pl.LightningModule):
         self.save_hyperparameters()
 
     def forward(self, batch):
-<<<<<<< HEAD
-        input_ids = batch["input_ids"]
-        punctuation = batch["punctuation"]  # .to("cuda:0")
-
-        punctuation = self.model(punctuation).last_hidden_state.permute(0, 2, 1)
-=======
         punctuation = self.model(batch["punctuation"]).last_hidden_state#.permute(0, 2, 1)
->>>>>>> add_architecture
 
         # punctuation = self.punc_embeddings(punctuation)
         # punctuation = [batch_size, sent_len, emb_dim]
 
-<<<<<<< HEAD
-        # punctuation = punctuation.unsqueeze(1)
-        # # embedded_cnn = [batch_size, 1, sent_len, emb_dim]
-        #
-        # conved = [torch.nn.ReLU()(conv(punctuation)).squeeze(3) for conv in self.convs]
-        # # conved_n = [batch_size, n_filters, sent_len - filter_sizes[n] + 1]
-        #
-        # pooled = [F.max_pool1d(conv, conv.shape[2]).squeeze(2) for conv in conved]
-        # # pooled_n = [batch_size, n_filters]
-        #
-        # cat_cnn = torch.cat(pooled, dim=1)
-        # cat_cnn = [batch_size, n_filters * len(filter_sizes)]
-
-        output_encoder = self.model(input_ids).last_hidden_state.permute(0, 2, 1)
-
-        maxed_pool = self.max_pool(output_encoder).squeeze(2)
-        punctuation = self.max_pool(punctuation).squeeze(2)
-        features = torch.cat((punctuation, maxed_pool), dim=1)
-=======
         punctuation = punctuation.unsqueeze(1)
         # # embedded_cnn = [batch_size, 1, sent_len, emb_dim]
         #
@@ -108,7 +78,6 @@ class Classifier(pl.LightningModule):
         information = self.max_pool_info(information).squeeze(2)
         # punctuation = self.max_pool(punctuation).squeeze(2)
         features = torch.cat((punctuation, maxed_pool, information), dim=1)
->>>>>>> add_architecture
 
         final_output = self.classifier(features)
         return final_output
