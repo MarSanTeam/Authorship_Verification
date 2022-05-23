@@ -7,15 +7,16 @@
         models:
             mt5 encoder finetune
 """
+import pytorch_lightning as pl
 # ============================ Third Party libs ============================
 import torch
-from torch import nn
-import pytorch_lightning as pl
+import torch.nn.functional as function
 import torchmetrics
-import torch.nn.functional as F
-
+from torch import nn
 # ============================ My packages ============================
 from transformers import T5EncoderModel
+
+from .attention import ScaledDotProductAttention
 
 
 class Classifier(pl.LightningModule):
@@ -32,53 +33,26 @@ class Classifier(pl.LightningModule):
         self.learning_rare = lr
 
         self.model = T5EncoderModel.from_pretrained(t5_model_path)
-        # self.punc_embeddings = nn.Embedding(kwargs["vocab_size"],
-        #                                     embedding_dim=kwargs["embedding_dim"],
-        #                                     padding_idx=kwargs["pad_idx"])
-        # self.punc_embeddings.weight.requires_grad = True
 
-        self.convs = nn.ModuleList([
-            nn.Conv2d(in_channels=1,
-                      out_channels=kwargs["n_filters"],
-                      kernel_size=(fs, self.model.config.d_model))#kwargs["embedding_dim"]))
-            for fs in kwargs["filter_sizes"]
-        ])
-
-        self.classifier = nn.Linear(2 * self.model.config.d_model + (len(kwargs["filter_sizes"])*kwargs["n_filters"]),
+        self.classifier = nn.Linear(3 * self.model.config.d_model,
                                     num_classes)
-
+        self.attention = ScaledDotProductAttention(3 * self.model.config.d_model)
         self.max_pool = nn.MaxPool1d(max_len)
-        self.max_pool_info = nn.MaxPool1d(max_len//4)
+        self.max_pool_info = nn.MaxPool1d(max_len // 4)
 
         self.loss = nn.CrossEntropyLoss()
         self.save_hyperparameters()
 
     def forward(self, batch):
-        punctuation = self.model(batch["punctuation"]).last_hidden_state#.permute(0, 2, 1)
+        punctuation = self.model(batch["punctuation"]).last_hidden_state  # .permute(0, 2, 1)
+        output_encoder = self.model(batch["input_ids"]).last_hidden_state  # .permute(0, 2, 1)
+        information = self.model(batch["information"]).last_hidden_state  # .permute(0, 2, 1)
+        output = torch.cat([punctuation, output_encoder, information], dim=2)
+        # output.size() = [batch_size, sent_len, embedding_dim+2*hid_dim]===>(64,150,1024)
 
-        # punctuation = self.punc_embeddings(punctuation)
-        # punctuation = [batch_size, sent_len, emb_dim]
-
-        punctuation = punctuation.unsqueeze(1)
-        # # embedded_cnn = [batch_size, 1, sent_len, emb_dim]
-        #
-        punctuation = [torch.nn.ReLU()(conv(punctuation)).squeeze(3) for conv in self.convs]
-        # conved_n = [batch_size, n_filters, sent_len - filter_sizes[n] + 1]
-        #
-        punctuation = [F.max_pool1d(conv, conv.shape[2]).squeeze(2) for conv in punctuation]
-        # # pooled_n = [batch_size, n_filters]
-        #
-        punctuation = torch.cat(punctuation, dim=1)
-        # cat_cnn = [batch_size, n_filters * len(filter_sizes)]
-
-        output_encoder = self.model(batch["input_ids"]).last_hidden_state.permute(0, 2, 1)
-        information = self.model(batch["information"]).last_hidden_state.permute(0, 2, 1)
-
-        maxed_pool = self.max_pool(output_encoder).squeeze(2)
-        information = self.max_pool_info(information).squeeze(2)
-        # punctuation = self.max_pool(punctuation).squeeze(2)
-        features = torch.cat((punctuation, maxed_pool, information), dim=1)
-
+        context, attn = self.attention(output, output, output)
+        output = context.permute(0, 2, 1)
+        features = function.max_pool1d(output, output.shape[2]).squeeze(2)
         final_output = self.classifier(features)
         return final_output
 
