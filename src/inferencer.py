@@ -1,5 +1,6 @@
 import logging
 from torch.utils.data import DataLoader
+import numpy as np
 
 from configuration import BaseConfig
 from transformers import T5Tokenizer
@@ -27,7 +28,7 @@ if __name__ == "__main__":
 
     T5_TOKENIZER = T5Tokenizer.from_pretrained(ARGS.language_model_tokenizer_path)
     logging.info("Tokenizer was loaded")
-    MODEL = Classifier.load_from_checkpoint(MODEL_PATH)
+    MODEL = Classifier.load_from_checkpoint(MODEL_PATH, map_location="cuda:0").to("cuda:0")
     logging.info("Model was loaded")
 
     FIRST_TEXT_PUNCTUATIONS = extract_punctuation_emoji(FIRST_AUTHORS_TEXTS)
@@ -63,3 +64,7 @@ if __name__ == "__main__":
         sample_batched["information"] = sample_batched["information"].to("cuda:0")
         sample_batched["pos"] = sample_batched["pos"].to("cuda:0")
         OUTPUT = MODEL(sample_batched)
+        OUTPUT = np.argmax(OUTPUT.cpu().detach().numpy(), axis=1)
+        # OUTPUT = OUTPUT
+
+        print(OUTPUT)
