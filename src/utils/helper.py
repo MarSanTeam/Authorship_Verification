@@ -1,13 +1,13 @@
 # import nltk
 # nltk.download('punkt')
-from nltk.tokenize import word_tokenize
-from nltk import pos_tag
+import json
 import re
 import string
 from typing import List
-import json
 
 import emoji
+from nltk import pos_tag
+from nltk.tokenize import word_tokenize
 
 
 def extract_pos(texts: List[str]) -> List[str]:
@@ -104,7 +104,6 @@ def truncate_sequence(texts: List[list], max_length: int) -> list:
 
 def create_punc_pair(first_texts: List[list], second_texts: List[list]) -> List[list]:
     """
-
     :param first_texts:
     :param second_texts:
     :return:
@@ -129,7 +128,21 @@ def prepare_test_data(path: str):
         data = json.loads(line.strip())
         first_authors_texts.append(data["pair"][0])
         second_authors_texts.append(data["pair"][1])
+
     return first_authors_texts, second_authors_texts
+
+
+def get_true_target(path: str):
+    """
+
+    :param path:
+    :return:
+    """
+    targets = []
+    for line in open(path, encoding="utf8"):
+        data = json.loads(line.strip())
+        targets.append(int(data["same"]))
+    return targets
 
 
 def handle_pos_tags(data: list, vocab2idx: dict) -> List[list]:

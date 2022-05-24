@@ -1,14 +1,16 @@
 import logging
-from torch.utils.data import DataLoader
+
 import numpy as np
+from torch.utils.data import DataLoader
+from transformers import T5Tokenizer
 
 from configuration import BaseConfig
 from data_loader import read_json
-from transformers import T5Tokenizer
+from dataset import InferenceDataset
 from models.t5_encoder_pos import Classifier
+from src.utils.helper import get_true_target
 from utils import prepare_test_data, extract_punctuation_emoji, extract_information, \
     extract_pos, handle_pos_tags
-from dataset import InferenceDataset
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -17,9 +19,10 @@ if __name__ == "__main__":
     CONFIG_CLASS = BaseConfig()
     ARGS = CONFIG_CLASS.get_config()
 
-    MODEL_PATH = "../assets/saved_models/version_115/" \
-                 "checkpoints/QTag-epoch=55-val_acc=0.92.ckpt"
+    MODEL_PATH = "/home/maryam.najafi/Project_Author_Verification/assets/saved_models/" \
+                 "Author_Verification/version_115/checkpoints/QTag-epoch=59-val_acc=0.92.ckpt"
     DATA_PATH = "../data/Raw/pairs.jsonl"
+    TRUE_PATH = "../data/Raw/truth.jsonl"
 
     FIRST_AUTHORS_TEXTS, SECOND_AUTHORS_TEXTS = prepare_test_data(path=DATA_PATH)
     FIRST_AUTHORS_TEXTS = FIRST_AUTHORS_TEXTS[:10]
@@ -74,3 +77,4 @@ if __name__ == "__main__":
 
         PREDICTIONS.extend(OUTPUT)
     print(PREDICTIONS)
+    print(get_true_target(TRUE_PATH)[:10])
