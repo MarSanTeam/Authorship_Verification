@@ -3,6 +3,7 @@
 import json
 import re
 import string
+import sys
 from typing import List
 
 import emoji
@@ -159,3 +160,14 @@ def handle_pos_tags(data: list, vocab2idx: dict) -> List[list]:
             ids.append(vocab2idx[pos])
         output_ids.append(ids)
     return output_ids
+
+
+def progress_bar(index, max, postText):
+    """
+
+    """
+    n_bar = 50  # size of progress bar
+    j = index / max
+    sys.stdout.write('\r')
+    sys.stdout.write(f"[{'=' * int(n_bar * j):{n_bar}s}] {int(100 * j)}%  {postText}")
+    sys.stdout.flush()
