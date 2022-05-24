@@ -130,3 +130,19 @@ def prepare_test_data(path: str):
         first_authors_texts.append(data["pair"][0])
         second_authors_texts.append(data["pair"][1])
     return first_authors_texts, second_authors_texts
+
+
+def handle_pos_tags(data: list, vocab2idx: dict) -> List[list]:
+    """
+
+    :param data:
+    :param vocab2idx:
+    :return:
+    """
+    output_ids = []
+    for sample in data:
+        ids = []
+        for pos in sample:
+            ids.append(vocab2idx[pos])
+        output_ids.append(ids)
+    return output_ids
