@@ -1,6 +1,7 @@
 import logging
 
 import numpy as np
+from sklearn.metrics import classification_report
 from torch.utils.data import DataLoader
 from transformers import T5Tokenizer
 
@@ -8,7 +9,8 @@ from configuration import BaseConfig
 from data_loader import read_json
 from dataset import InferenceDataset
 from models.t5_encoder_pos import Classifier
-from src.utils.helper import get_true_target
+from src.evaluation.evaluation import evaluate_all
+from src.utils.helper import get_true_target, progress_bar
 from utils import prepare_test_data, extract_punctuation_emoji, extract_information, \
     extract_pos, handle_pos_tags
 
@@ -25,8 +27,8 @@ if __name__ == "__main__":
     TRUE_PATH = "../data/Raw/truth.jsonl"
 
     FIRST_AUTHORS_TEXTS, SECOND_AUTHORS_TEXTS = prepare_test_data(path=DATA_PATH)
-    FIRST_AUTHORS_TEXTS = FIRST_AUTHORS_TEXTS[:10]
-    SECOND_AUTHORS_TEXTS = SECOND_AUTHORS_TEXTS[:10]
+    FIRST_AUTHORS_TEXTS = FIRST_AUTHORS_TEXTS
+    SECOND_AUTHORS_TEXTS = SECOND_AUTHORS_TEXTS
 
     POS_VOCAB2IDX = read_json(path="../assets/token_vocab2idx.json")
     logging.info("Data was loaded")
@@ -63,7 +65,7 @@ if __name__ == "__main__":
     DATASET = InferenceDataset(data=DATA, tokenizer=T5_TOKENIZER,
                                max_len=ARGS.max_len)
 
-    DATALOADER = DataLoader(DATASET, batch_size=4,
+    DATALOADER = DataLoader(DATASET, batch_size=16,
                             shuffle=False, num_workers=4)
 
     PREDICTIONS = []
@@ -74,7 +76,13 @@ if __name__ == "__main__":
         sample_batched["pos"] = sample_batched["pos"].to("cuda:0")
         OUTPUT = MODEL(sample_batched)
         OUTPUT = np.argmax(OUTPUT.cpu().detach().numpy(), axis=1)
-
+        progress_bar(i_batch, len(DATALOADER), "testing ....")
         PREDICTIONS.extend(OUTPUT)
+        print()
+    report = classification_report(y_true=list(get_true_target(TRUE_PATH)), y_pred=PREDICTIONS,
+                                   target_names=["1", "0"])
+    print(report)
     print(PREDICTIONS)
-    print(get_true_target(TRUE_PATH)[:10])
+    print(get_true_target(TRUE_PATH))
+    results = evaluate_all(get_true_target(TRUE_PATH), PREDICTIONS)
+    print(results)
