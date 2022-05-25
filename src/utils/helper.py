@@ -1,12 +1,66 @@
 # import nltk
 # nltk.download('punkt')
-# from nltk.tokenize import word_tokenize
-# from nltk import pos_tag
+import json
 import re
 import string
+import sys
 from typing import List
 
 import emoji
+from nltk import pos_tag
+from nltk.tokenize import word_tokenize
+
+
+def prepare_test_data(path: str):
+    """
+    :param path:
+    :return:
+    """
+    first_authors_texts, second_authors_texts, sample_id = [], [], []
+    for line in open(path, encoding="utf8"):
+        data = json.loads(line.strip())
+        sample_id.append(data["id"])
+        first_authors_texts.append(data["pair"][0])
+        second_authors_texts.append(data["pair"][1])
+
+    return first_authors_texts, second_authors_texts, sample_id
+
+
+def get_true_target(path: str):
+    """
+    :param path:
+    :return:
+    """
+    targets = []
+    for line in open(path, encoding="utf8"):
+        data = json.loads(line.strip())
+        targets.append(int(data["same"]))
+    return targets
+
+
+def handle_pos_tags(data: list, vocab2idx: dict) -> List[list]:
+    """
+    :param data:
+    :param vocab2idx:
+    :return:
+    """
+    output_ids = []
+    for sample in data:
+        ids = []
+        for pos in sample:
+            ids.append(vocab2idx[pos])
+        output_ids.append(ids)
+    return output_ids
+
+
+def progress_bar(index, max, postText):
+    """
+    """
+    n_bar = 50  # size of progress bar
+    j = index / max
+    sys.stdout.write('\r')
+    sys.stdout.write(f"[{'=' * int(n_bar * j):{n_bar}s}] {int(100 * j)}%  {postText}")
+    sys.stdout.flush()
 
 
 def extract_pos(texts: List[str]) -> List[str]:
@@ -73,7 +127,7 @@ def extract_information(texts: List[str]) -> List[str]:
 
 
 def pad_sequence(texts: List[list], max_length: int, pad_item: str = "[PAD]") -> List[list]:
-    """
+    """r
 
     :param texts: [["item_1", "item_2", "item_3"], ["item_1", "item_2"]]
     :param max_length: 4

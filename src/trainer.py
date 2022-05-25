@@ -139,7 +139,7 @@ if __name__ == "__main__":
     # ------------------------------------- Indexer --------------------------------------------
     TARGET_INDEXER = Indexer(vocabs=list(TRAIN_DATA.targets))
     TARGET_INDEXER.build_vocab2idx()
-
+    TARGET_INDEXER.save("")
     TRAIN_TARGETS_CONVENTIONAL = [[target] for target in list(TRAIN_DATA.targets)]
     TRAIN_INDEXED_TARGET = TARGET_INDEXER.convert_samples_to_indexes(TRAIN_TARGETS_CONVENTIONAL)
 
@@ -163,6 +163,7 @@ if __name__ == "__main__":
 
     POS_VOCABS = list(itertools.chain(*TRAIN_FIRST_TEXT_POS + TRAIN_SECOND_TEXT_POS))
     POS_INDEXER = TokenIndexer(vocabs=POS_VOCABS)
+    POS_INDEXER.save("")
     POS_INDEXER.build_vocab2idx()
 
     TRAIN_FIRST_TEXT_POS = POS_INDEXER.convert_samples_to_indexes(TRAIN_FIRST_TEXT_POS)

@@ -5,8 +5,11 @@
             index
 """
 
+import os
 # ============================ Third Party libs ============================
 from typing import List
+
+from data_loader import write_json
 
 # =============================== My packages ==============================
 from .indexer import Indexer
@@ -82,3 +85,15 @@ class TokenIndexer(Indexer):
                     chars.append(self.get_idx(char))
                 tokenized_samples[index][token_index] = chars
         return tokenized_samples
+
+    def save(self, path) -> None:
+        """
+
+        :param path:
+        :return:
+        """
+        # write_text(data=self.vocabs, path=os.path.join(path, "vocabs.txt"))
+        write_json(data=self.get_vocab2idx(),
+                   path=os.path.join(path, "token_vocab2idx.json"))
+        write_json(data=self.get_idx2vocab(),
+                   path=os.path.join(path, "token_idx2vocab.json"))

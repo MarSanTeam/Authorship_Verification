@@ -139,8 +139,8 @@ class Indexer:
         :param path:
         :return:
         """
-        write_text(data=self.vocabs, path=os.path.join(path, "vocabs.txt"))
+        # write_text(data=self.vocabs, path=os.path.join(path, "vocabs.txt"))
         write_json(data=self.get_vocab2idx(),
-                   path=os.path.join(path, "vocab2idx.json"))
+                   path=os.path.join(path, "target_vocab2idx.json"))
         write_json(data=self.get_idx2vocab(),
-                   path=os.path.join(path, "idx2vocab.json"))
+                   path=os.path.join(path, "target_idx2vocab.json"))

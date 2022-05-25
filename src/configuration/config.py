@@ -54,7 +54,8 @@ class BaseConfig:
 
         self.parser.add_argument("--csv_logger_path", type=str,
                                  default=Path(__file__).parents[2].__str__() + "/assets")
-
+        self.parser.add_argument("--best_model_path", type=str,
+                                 default="Author_Verification/version_115/checkpoints/QTag-epoch=59-val_acc=0.92.ckpt")
         self.parser.add_argument("--pair_data", type=str, default="pairs.jsonl")
         self.parser.add_argument("--truth_data", type=str, default="truth.jsonl")
 
