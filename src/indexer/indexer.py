@@ -10,7 +10,7 @@ from abc import abstractmethod
 from typing import List
 
 # =============================== My packages ==============================
-from data_loader import write_json, write_text
+from data_loader import write_json, read_json
 
 
 # ==========================================================================
@@ -21,11 +21,12 @@ class Indexer:
         Indexer Class
     """
 
-    def __init__(self, vocabs: list):
+    def __init__(self, vocabs: list = None):
         self.vocabs = vocabs
         self._vocab2idx = None
         self._idx2vocab = None
-        self._unitize_vocabs()  # build unique vocab
+        if self.vocabs:
+            self._unitize_vocabs()  # build unique vocab
 
     def get_vocab2idx(self) -> dict:
         """
@@ -99,6 +100,8 @@ class Indexer:
         _empty_vocab_handler
         :return:
         """
+        if not self.vocabs:
+            raise Exception("Vocabs is None")
         self.build_vocab2idx()
         self.build_idx2vocab()
 
@@ -133,14 +136,28 @@ class Indexer:
         """
         self.vocabs = list(set(self.vocabs))
 
-    def save(self, path) -> None:
+    def load(self, vocab2idx_path: str, idx2vocab_path: str):
         """
 
-        :param path:
-        :return:
+        Args:
+            vocab2idx_path:
+            idx2vocab_path:
+
+        Returns:
+
         """
-        # write_text(data=self.vocabs, path=os.path.join(path, "vocabs.txt"))
-        write_json(data=self.get_vocab2idx(),
-                   path=os.path.join(path, "target_vocab2idx.json"))
-        write_json(data=self.get_idx2vocab(),
-                   path=os.path.join(path, "target_idx2vocab.json"))
+        self._vocab2idx = read_json(path=vocab2idx_path)
+        self._idx2vocab = read_json(path=idx2vocab_path)
+
+    def save(self, vocab2idx_path: str, idx2vocab_path: str) -> None:
+        """
+
+        Args:
+            vocab2idx_path:
+            idx2vocab_path:
+
+        Returns:
+
+        """
+        write_json(data=self.get_vocab2idx(), path=vocab2idx_path)
+        write_json(data=self.get_idx2vocab(), path=idx2vocab_path)

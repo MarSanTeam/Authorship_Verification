@@ -1,18 +1,16 @@
-# pylint: disable-msg=too-few-public-methods
-# pylint: disable-msg=no-member
-# pylint: disable-msg=arguments-differ
+# -*- coding: utf-8 -*-
+# ========================================================
 
 """
-    AV Project:
-        models:
-            dataset
+    Author Verification Project:
+        dataset:
+            dataset.py
 """
 
 # ============================ Third Party libs ============================
 from abc import ABC, abstractmethod
-
-import pytorch_lightning as pl
 import torch
+import transformers
 
 
 # ==========================================================================
@@ -20,10 +18,17 @@ import torch
 
 class CustomDataset(ABC, torch.utils.data.Dataset):
     """
-        CustomDataset is a abstract class
+    Abstract class to  write dataset class for training language comprehension model
+
+    Attributes:
+        data: all features for each data
+        tokenizer: huggingface tokenizer
+        max_len: maximum length for each sample
     """
 
-    def __init__(self, data: dict, tokenizer, max_len: int):
+    def __init__(self, data: dict,
+                 tokenizer: transformers.AutoTokenizer.from_pretrained,
+                 max_len: int):
         self.first_text = data["first_text"]
         self.second_text = data["second_text"]
 
@@ -48,10 +53,16 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
     @abstractmethod
     def __getitem__(self, item_index):
         """
+        function te return one sample by given index
 
-        :param item_index:
-        :return:
+        Args:
+            item_index: random index of sample
+
+        Returns:
+            selected sample by given index
+
         """
+
         first_text = self.first_text[item_index]
         second_text = self.second_text[item_index]
 
@@ -66,12 +77,27 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
 
         if self.targets:
             target = self.targets[item_index]
-            return first_text, second_text, first_punctuations, second_punctuations, first_information, \
-                   second_information, first_pos, second_pos, target
-        return first_text, second_text, first_punctuations, second_punctuations, \
-               first_information, second_information, first_pos, second_pos
+        else:
+            target = None
 
-    def pair_data_tokenizer(self, first_text, second_text, max_len):
+        return first_text, second_text, first_punctuations, second_punctuations, \
+               first_information, second_information, first_pos, second_pos, target
+
+    def pair_data_tokenizer(self,
+                            first_text: str,
+                            second_text: str,
+                            max_len: int):
+        """
+        pair data tokenizer
+        Args:
+            first_text: first text
+            second_text: second text
+            max_len: maximum length for each sample
+
+        Returns:
+            tokenized sample
+
+        """
         batch = self.tokenizer.encode_plus(text=first_text,
                                            text_pair=second_text,
                                            add_special_tokens=True,
@@ -82,7 +108,17 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
                                            return_token_type_ids=True)
         return batch
 
-    def single_data_tokenizer(self, text):
+    def single_data_tokenizer(self,
+                              text: str):
+        """
+        single data tokenizer
+        Args:
+            text: text
+
+        Returns:
+            tokenized sample
+
+        """
         batch = self.tokenizer.encode_plus(text=text,
                                            add_special_tokens=True,
                                            max_length=self.max_len,
@@ -93,138 +129,36 @@ class CustomDataset(ABC, torch.utils.data.Dataset):
         return batch
 
 
-class SeparateDataset(CustomDataset):
-    """
-        SeparateDataset
-    """
-
-    def __init__(self, data: dict, tokenizer, max_len: int):
-        super().__init__(data, tokenizer, max_len)
-
-    def __getitem__(self, item_index):
-        first_text, second_text, punctuations, target = super(SeparateDataset, self).__getitem__(item_index)
-        first_text = self.single_data_tokenizer(first_text)
-        second_text = self.single_data_tokenizer(second_text)
-
-        first_text = first_text.input_ids.flatten()
-        second_text = second_text.input_ids.flatten()
-
-        return {"first_text": first_text,
-                "second_text": second_text,
-                "targets": torch.tensor(target)}
-
-
 class ConcatDataset(CustomDataset):
     """
-        ConcatDataset
+    ConcatDataset class to create data for author verification model
+
+    Attributes:
+        data: all features for each data
+        tokenizer: huggingface tokenizer
+        max_len: maximum length for each sample
+
     """
-
-    def __init__(self, data, tokenizer, max_len: int):
-        super().__init__(data, tokenizer, max_len)
-
     def __getitem__(self, item_index):
         first_text, second_text, first_punctuations, second_punctuations, \
-        first_information, second_information, first_pos, second_pos, target = super(ConcatDataset, self).__getitem__(
-            item_index)
-        batch = self.pair_data_tokenizer(first_text, second_text, max_len=self.max_len)
+        first_information, second_information, first_pos, \
+        second_pos, target = super().__getitem__(item_index)
+
+        text = self.pair_data_tokenizer(first_text, second_text, max_len=self.max_len)
+
         punctuations = self.pair_data_tokenizer(first_punctuations, second_punctuations,
                                                 max_len=self.max_len)
         information = self.pair_data_tokenizer(first_information, second_information,
                                                max_len=self.max_len)
-        pos = self.pair_data_tokenizer(first_pos, second_pos,
-                                       max_len=self.max_len)
+        pos = self.pair_data_tokenizer(first_pos, second_pos, max_len=self.max_len)
 
-        input_ids = batch.input_ids.flatten()
+        input_ids = text.input_ids.flatten()
         punctuations = punctuations.input_ids.flatten()
         information = information.input_ids.flatten()
         pos = pos.input_ids.flatten()
 
-        return {"input_ids": input_ids, "punctuation": punctuations, "information": information, "pos": pos,
-                "targets": torch.tensor(target)}
-
-
-class GenerationDataset(CustomDataset):
-    """
-        GenerativeDataset
-    """
-
-    def __init__(self, data: dict, tokenizer, max_len: int):
-        super().__init__(data, tokenizer, max_len)
-
-    def __getitem__(self, item_index):
-        """
-
-        :param item_index:
-        :return:
-        """
-        first_text, second_text, target = super(GenerationDataset, self).__getitem__(item_index)
-
-        input_batch = self.pair_data_tokenizer(first_text, second_text)
-
-        with self.tokenizer.as_target_tokenizer():
-            target_batch = self.single_data_tokenizer(str(target))
-
-        inputs_ids = input_batch.input_ids.flatten()
-        target_ids = target_batch.input_ids.flatten()
-
-        return {"input_ids": inputs_ids, "targets": torch.tensor(target), "target_ids": target_ids}
-
-
-class InferenceDataset(CustomDataset):
-    """
-    dataset to inference  data from model checkpoint
-    """
-
-    def __init__(self, data: dict, tokenizer, max_len):
-        super(InferenceDataset, self).__init__(data, tokenizer, max_len)
-
-    def __getitem__(self, item_index):
-        first_text, second_text = super(InferenceDataset, self).__getitem__(item_index)
-
-        batch = self.pair_data_tokenizer(first_text, second_text)
-
-        input_ids = batch.input_ids.flatten()
-
-        return {"input_ids": input_ids}
-
-
-class DataModule(pl.LightningDataModule):
-    """
-        DataModule
-    """
-
-    def __init__(self, data: dict,
-                 config, tokenizer):
-        super().__init__()
-        self.config = config
-        self.data = data
-        self.tokenizer = tokenizer
-        self.customs_dataset = {}
-
-    def setup(self):
-        self.customs_dataset["train_dataset"] = ConcatDataset(
-            data=self.data["train_data"], tokenizer=self.tokenizer, max_len=self.config.max_len
-        )
-
-        self.customs_dataset["val_dataset"] = ConcatDataset(
-            data=self.data["val_data"], tokenizer=self.tokenizer, max_len=self.config.max_len
-        )
-
-        self.customs_dataset["test_dataset"] = ConcatDataset(
-            data=self.data["test_data"], tokenizer=self.tokenizer, max_len=self.config.max_len
-        )
-
-    def train_dataloader(self):
-        return torch.utils.data.DataLoader(self.customs_dataset["train_dataset"],
-                                           batch_size=self.config.batch_size,
-                                           shuffle=True, num_workers=self.config.num_workers)
-
-    def val_dataloader(self):
-        return torch.utils.data.DataLoader(self.customs_dataset["val_dataset"],
-                                           batch_size=self.config.batch_size,
-                                           num_workers=self.config.num_workers)
-
-    def test_dataloader(self):
-        return torch.utils.data.DataLoader(self.customs_dataset["test_dataset"],
-                                           batch_size=self.config.batch_size,
-                                           num_workers=self.config.num_workers)
+        if target:
+            return {"input_ids": input_ids, "punctuation": punctuations, "information": information,
+                    "pos": pos, "targets": torch.tensor(target)}
+        return {"input_ids": input_ids, "punctuation": punctuations, "information": information,
+                "pos": pos}

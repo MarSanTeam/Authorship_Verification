@@ -2,7 +2,8 @@
 # nltk.download('punkt')
 import json
 import re
-import string
+
+
 import sys
 from typing import List
 
@@ -63,36 +64,6 @@ def progress_bar(index, max, postText):
     sys.stdout.flush()
 
 
-def extract_pos(texts: List[str]) -> List[str]:
-    poses = []
-    for text in texts:
-        pos_taged = pos_tag(word_tokenize(text))
-        pos_taged = [pos_tag(word)[0][1] for word in pos_taged]
-
-        poses.append(pos_taged)
-    return poses
-
-
-def extract_punctuation_emoji(texts: List[str]) -> List[str]:
-    """
-
-    :param texts:
-    :return:
-    """
-    punctuations = []
-    punc = set(string.punctuation)
-    emj = set(emoji.UNICODE_EMOJI['en'])
-
-    pattern = r"(?<=\<).*?(?=\>)"
-    exclude = punc | emj
-    exclude.remove(">")
-    exclude.remove("<")
-    for txt in texts:
-        txt = re.sub(pattern, "", txt)
-        punc = " ".join(ch for ch in txt if ch in exclude)
-        punctuations.append(punc)
-    return punctuations
-
 
 def extract_punctuation(texts: List[str]) -> List[str]:
     """
@@ -111,19 +82,7 @@ def extract_punctuation(texts: List[str]) -> List[str]:
     return punctuations
 
 
-def extract_information(texts: List[str]) -> List[str]:
-    """
 
-    :param texts:
-    :return:
-    """
-    extracted_information = []
-    pattern = r"(?<=\<).*?(?=\>)"
-    for text in texts:
-        text = re.findall(pattern, text)
-        extracted_information.append(" ".join(text))
-
-    return extracted_information
 
 
 def pad_sequence(texts: List[list], max_length: int, pad_item: str = "[PAD]") -> List[list]:

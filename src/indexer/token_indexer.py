@@ -23,7 +23,7 @@ class TokenIndexer(Indexer):
         TokenIndexer
     """
 
-    def __init__(self, vocabs: list, pad_index: int = 0, unk_index: int = 1):
+    def __init__(self, vocabs: list = None, pad_index: int = 0, unk_index: int = 1):
         super().__init__(vocabs)
         self.pad_index = pad_index
         self.unk_index = unk_index
@@ -85,15 +85,3 @@ class TokenIndexer(Indexer):
                     chars.append(self.get_idx(char))
                 tokenized_samples[index][token_index] = chars
         return tokenized_samples
-
-    def save(self, path) -> None:
-        """
-
-        :param path:
-        :return:
-        """
-        # write_text(data=self.vocabs, path=os.path.join(path, "vocabs.txt"))
-        write_json(data=self.get_vocab2idx(),
-                   path=os.path.join(path, "token_vocab2idx.json"))
-        write_json(data=self.get_idx2vocab(),
-                   path=os.path.join(path, "token_idx2vocab.json"))

@@ -1,16 +1,21 @@
-# pylint: disable-msg=no-member
-# pylint: disable-msg=import-error
+# -*- coding: utf-8 -*-
+# ========================================================
+
 """
-    AV Project:
+    Author Verification Project:
         models:
-            helper
+            helper.py
 """
+
 # ============================ Third Party libs ============================
+
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 
 def build_checkpoint_callback(save_top_k,
-                              filename='QTag-{epoch:02d}-{val_loss:.2f}', monitor='val_loss', mode='min'):
+                              filename="QTag-{epoch:02d}-{val_loss:.2f}",
+                              monitor="val_loss",
+                              mode="min"):
     """
     :param save_top_k: save top k model that has low loss
     :param filename: the name that checkpoint is saved.
